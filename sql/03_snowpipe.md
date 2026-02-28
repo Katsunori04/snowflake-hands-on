@@ -165,7 +165,7 @@ on_error = 'CONTINUE';
 | `false`（今回） | 手動で `alter pipe ... refresh` を実行してデータを取り込む |
 | `true` | S3/GCS などのイベント通知と連携し、ファイルが置かれると自動で取り込む。クラウドストレージ側でイベント通知設定が別途必要 |
 
-Airflow（10章）などの外部オーケストレーターから `alter pipe RAW.EVENTS_PIPE refresh;` を定期実行するのが典型的なパターンです。
+Airflow（12章）などの外部オーケストレーターから `alter pipe RAW.EVENTS_PIPE refresh;` を定期実行するのが典型的なパターンです。
 
 ---
 

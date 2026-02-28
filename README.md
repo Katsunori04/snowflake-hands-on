@@ -19,12 +19,14 @@
 | 第2章 | JSON と VARIANT | [教材を読む](sql/02_json_variant.md) | [02_json_variant.sql](sql/02_json_variant.sql) |
 | 第3章 | ファイル取り込み（Snowpipe） | [教材を読む](sql/03_snowpipe.md) | [03_snowpipe.sql](sql/03_snowpipe.sql) |
 | 第4章 | 増分バッチ（Streams & Tasks） | [教材を読む](sql/04_streams_tasks.md) | [04_streams_tasks.sql](sql/04_streams_tasks.sql) |
-| 第5章 | スタースキーマの構築 | [教材を読む](sql/05_star_schema.md) | [05_star_schema.sql](sql/05_star_schema.sql) |
-| 第6章 | コスト最適化の基本 | [教材を読む](sql/06_cost_optimization.md) | [06_cost_optimization.sql](sql/06_cost_optimization.sql) |
-| 第7章 | AI 関数（Snowflake Cortex） | [教材を読む](sql/07_ai_sql.md) | [07_ai_sql.sql](sql/07_ai_sql.sql) |
-| 第8章 | 全体パイプラインの復習 | [教材を読む](sql/08_end_to_end_pipeline.md) | [08_end_to_end_pipeline.sql](sql/08_end_to_end_pipeline.sql) |
-| 第9章 | dbt 入門 | [教材を読む](sql/09_dbt.md) | [dbt/ フォルダ](dbt/) |
-| 第10章 | Airflow 入門 | [教材を読む](sql/10_airflow.md) | [airflow/ フォルダ](airflow/) |
+| 第5章 | 処理の再利用と宣言的更新（ストアドプロシージャ・Dynamic Table） | [教材を読む](sql/05_stored_proc_dynamic_table.md) | [05_stored_proc_dynamic_table.sql](sql/05_stored_proc_dynamic_table.sql) |
+| 第6章 | スタースキーマの構築 | [教材を読む](sql/06_star_schema.md) | [06_star_schema.sql](sql/06_star_schema.sql) |
+| 第7章 | コスト最適化の基本 | [教材を読む](sql/07_cost_optimization.md) | [07_cost_optimization.sql](sql/07_cost_optimization.sql) |
+| 第8章 | AI 関数（Snowflake Cortex） | [教材を読む](sql/08_ai_sql.md) | [08_ai_sql.sql](sql/08_ai_sql.sql) |
+| 第9章 | セマンティックビュー・Cortex Analyst・Cortex Search | [教材を読む](sql/09_semantic_view_cortex.md) | [09_semantic_view_cortex.sql](sql/09_semantic_view_cortex.sql) |
+| 第10章 | 全体パイプラインの復習 | [教材を読む](sql/10_end_to_end_pipeline.md) | [10_end_to_end_pipeline.sql](sql/10_end_to_end_pipeline.sql) |
+| 第11章 | dbt 入門 | [教材を読む](sql/11_dbt.md) | [dbt/ フォルダ](dbt/) |
+| 第12章 | Airflow 入門 | [教材を読む](sql/12_airflow.md) | [airflow/ フォルダ](airflow/) |
 
 ## 学習ゴール
 
@@ -51,10 +53,12 @@ snowflake-hands-on/
     02_json_variant.sql
     03_snowpipe.sql
     04_streams_tasks.sql
-    05_star_schema.sql
-    06_cost_optimization.sql
-    07_ai_sql.sql
-    08_end_to_end_pipeline.sql
+    05_stored_proc_dynamic_table.sql
+    06_star_schema.sql
+    07_cost_optimization.sql
+    08_ai_sql.sql
+    09_semantic_view_cortex.sql
+    10_end_to_end_pipeline.sql
   dbt/
     profiles.example.yml
     dbt_project.yml
@@ -100,11 +104,11 @@ snowflake-hands-on/
 | RAW_EVENTS_STREAM | 04_streams_tasks.sql | RAW | RAW_EVENTS_PIPE の差分を提供する Stream |
 | STG_EVENTS | 02_json_variant.sql | STAGING | イベント単位に整形（1イベント1行） |
 | STG_EVENT_ITEMS | 02_json_variant.sql | STAGING | 商品明細単位に展開（1商品1行） |
-| REVIEWS | 07_ai_sql.sql | STAGING | AI 関数のテスト用レビューデータ |
+| REVIEWS | 08_ai_sql.sql | STAGING | AI 関数のテスト用レビューデータ |
 | FACT_PURCHASE_EVENTS | 04_streams_tasks.sql | MART | 購入イベントのファクトテーブル |
-| DIM_USERS | 05_star_schema.sql | MART | ユーザーのディメンションテーブル |
-| DIM_PRODUCTS | 05_star_schema.sql | MART | 商品のディメンションテーブル |
-| DIM_DATE | 05_star_schema.sql | MART | 日付のディメンションテーブル |
+| DIM_USERS | 06_star_schema.sql | MART | ユーザーのディメンションテーブル |
+| DIM_PRODUCTS | 06_star_schema.sql | MART | 商品のディメンションテーブル |
+| DIM_DATE | 06_star_schema.sql | MART | 日付のディメンションテーブル |
 
 ## 章ごとの見方
 
@@ -169,6 +173,9 @@ datasets/events_sample.json
 | COPY INTO | Stage からテーブルへファイルをロードするコマンド |
 | MERGE | 条件に応じて UPDATE / INSERT を切り替えるアップサート構文 |
 | スタースキーマ | FACT（計測値）と DIMENSION（属性）を分けるデータモデル |
+| Semantic View | メトリクス・ディメンション・リレーションをDBに登録するビジネス定義オブジェクト |
+| Cortex Analyst | Semantic View を使って自然言語の質問を SQL に変換する AI 機能 |
+| Cortex Search | テキストを全文検索とベクトル検索でハイブリッド検索するサービス |
 
 ## 学習スケジュール例
 
@@ -177,9 +184,9 @@ datasets/events_sample.json
 1. Day 1: `00_setup.sql`, `01_modeling_basics.sql`, `02_json_variant.sql`
 2. Day 2: `03_snowpipe.sql`
 3. Day 3: `04_streams_tasks.sql`
-4. Day 4: `05_star_schema.sql`, `06_cost_optimization.sql`
-5. Day 5: `07_ai_sql.sql`
-6. Day 6: `dbt`, `airflow`, `08_end_to_end_pipeline.sql`
+4. Day 4: `05_stored_proc_dynamic_table.sql`, `06_star_schema.sql`
+5. Day 5: `07_cost_optimization.sql`, `08_ai_sql.sql`
+6. Day 6: `09_semantic_view_cortex.sql`, `dbt`, `airflow`, `10_end_to_end_pipeline.sql`
 
 ### 10日プラン
 

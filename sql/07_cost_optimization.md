@@ -1,6 +1,6 @@
-# 第6章: コスト最適化の基本
+# 第7章: コスト最適化の基本
 
-> この章で実行するファイル: `sql/06_cost_optimization.sql`
+> この章で実行するファイル: `sql/07_cost_optimization.sql`
 
 ## この章で学ぶこと
 

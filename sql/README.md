@@ -9,7 +9,7 @@
 1. **教材テキスト（.md）を読む** — 章の目的・コードの意味を把握する
 2. **SQL ファイル（.sql）を Snowsight で実行する** — コードを動かして確認する
 
-> 第9章（dbt）と第10章（Airflow）は SQL ファイルがなく、各専用フォルダにサンプルコードが入っています。
+> 第11章（dbt）と第12章（Airflow）は SQL ファイルがなく、各専用フォルダにサンプルコードが入っています。
 
 ---
 
@@ -22,12 +22,14 @@
 | 第2章 | JSON と VARIANT | [02_json_variant.md](./02_json_variant.md) | [02_json_variant.sql](./02_json_variant.sql) |
 | 第3章 | ファイル取り込み（Snowpipe） | [03_snowpipe.md](./03_snowpipe.md) | [03_snowpipe.sql](./03_snowpipe.sql) |
 | 第4章 | 増分バッチ（Streams & Tasks） | [04_streams_tasks.md](./04_streams_tasks.md) | [04_streams_tasks.sql](./04_streams_tasks.sql) |
-| 第5章 | スタースキーマの構築 | [05_star_schema.md](./05_star_schema.md) | [05_star_schema.sql](./05_star_schema.sql) |
-| 第6章 | コスト最適化の基本 | [06_cost_optimization.md](./06_cost_optimization.md) | [06_cost_optimization.sql](./06_cost_optimization.sql) |
-| 第7章 | AI 関数（Snowflake Cortex） | [07_ai_sql.md](./07_ai_sql.md) | [07_ai_sql.sql](./07_ai_sql.sql) |
-| 第8章 | 全体パイプラインの復習 | [08_end_to_end_pipeline.md](./08_end_to_end_pipeline.md) | [08_end_to_end_pipeline.sql](./08_end_to_end_pipeline.sql) |
-| 第9章 | dbt 入門 | [09_dbt.md](./09_dbt.md) | [dbt/ フォルダ](../dbt/) |
-| 第10章 | Airflow 入門 | [10_airflow.md](./10_airflow.md) | [airflow/ フォルダ](../airflow/) |
+| 第5章 | 処理の再利用と宣言的更新（ストアドプロシージャ・Dynamic Table） | [05_stored_proc_dynamic_table.md](./05_stored_proc_dynamic_table.md) | [05_stored_proc_dynamic_table.sql](./05_stored_proc_dynamic_table.sql) |
+| 第6章 | スタースキーマの構築 | [06_star_schema.md](./06_star_schema.md) | [06_star_schema.sql](./06_star_schema.sql) |
+| 第7章 | コスト最適化の基本 | [07_cost_optimization.md](./07_cost_optimization.md) | [07_cost_optimization.sql](./07_cost_optimization.sql) |
+| 第8章 | AI 関数（Snowflake Cortex） | [08_ai_sql.md](./08_ai_sql.md) | [08_ai_sql.sql](./08_ai_sql.sql) |
+| 第9章 | セマンティックビュー・Cortex Analyst・Cortex Search | [09_semantic_view_cortex.md](./09_semantic_view_cortex.md) | [09_semantic_view_cortex.sql](./09_semantic_view_cortex.sql) |
+| 第10章 | 全体パイプラインの復習 | [10_end_to_end_pipeline.md](./10_end_to_end_pipeline.md) | [10_end_to_end_pipeline.sql](./10_end_to_end_pipeline.sql) |
+| 第11章 | dbt 入門 | [11_dbt.md](./11_dbt.md) | [dbt/ フォルダ](../dbt/) |
+| 第12章 | Airflow 入門 | [12_airflow.md](./12_airflow.md) | [airflow/ フォルダ](../airflow/) |
 
 ---
 

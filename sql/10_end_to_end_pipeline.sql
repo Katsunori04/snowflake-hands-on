@@ -18,8 +18,8 @@
 --           ▼
 --     MART.FACT_PURCHASE_EVENTS
 --           │
---           ├──→ DIM_USERS / DIM_PRODUCTS / DIM_DATE（05章）
---           └──→ AI_COMPLETE / AI_CLASSIFY（07章）
+--           ├──→ DIM_USERS / DIM_PRODUCTS / DIM_DATE（06章）
+--           └──→ AI_COMPLETE / AI_CLASSIFY（08章）
 
 -- 1. raw にあるデータの確認（← 03章 COPY INTO で取り込んだデータ）
 select
@@ -40,7 +40,7 @@ select
 from LEARN_DB.MART.FACT_PURCHASE_EVENTS
 order by event_id, sku;
 
--- 3. star schema での集計（← 05章 DIM_PRODUCTS と JOIN）
+-- 3. star schema での集計（← 06章 DIM_PRODUCTS と JOIN）
 select
   d.category,
   sum(f.line_amount) as sales_amount
@@ -50,7 +50,7 @@ join LEARN_DB.MART.DIM_PRODUCTS d
 group by d.category
 order by sales_amount desc;
 
--- 4. AI で review を要約（← 07章 STAGING.REVIEWS のデータ）
+-- 4. AI で review を要約（← 08章 STAGING.REVIEWS のデータ）
 select
   review_id,
   AI_COMPLETE(
@@ -64,5 +64,5 @@ order by review_id;
 -- - raw は元データを保持（03章）
 -- - stream は差分を提供（04章）
 -- - task は変換を定期実行（04章）
--- - mart は分析しやすい形（05章）
--- - AI はテキスト列の後段処理（07章）
+-- - mart は分析しやすい形（06章）
+-- - AI はテキスト列の後段処理（08章）

@@ -2,7 +2,7 @@
 
 このフォルダには、Apache Airflow の DAG サンプルが入っています。
 
-先に **[sql/10_airflow.md](../sql/10_airflow.md)** を読んでから、このフォルダのファイルを参照してください。
+先に **[sql/12_airflow.md](../sql/12_airflow.md)** を読んでから、このフォルダのファイルを参照してください。
 
 ---
 
@@ -38,4 +38,4 @@ check_row_count
 
 Airflow の Connections に `snowflake_default` という名前で Snowflake の接続情報を登録する必要があります。
 
-設定手順の詳細は [sql/10_airflow.md](../sql/10_airflow.md) を参照してください。
+設定手順の詳細は [sql/12_airflow.md](../sql/12_airflow.md) を参照してください。
