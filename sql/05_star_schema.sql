@@ -3,10 +3,18 @@
 -- - スタースキーマで集計する
 -- - MART 層で分析しやすい形を作る
 
+-- 【この章の位置づけ】
+-- 04章で作った FACT_PURCHASE_EVENTS（購入イベントのファクト）から
+-- DIM（ディメンション）テーブルを派生させてスタースキーマを完成させる。
+-- 04章を実行済みであること（FACT_PURCHASE_EVENTS にデータがあること）を前提とする。
+
 use warehouse LEARN_WH;
 use database LEARN_DB;
 use schema MART;
 
+-- DIM_USERS: FACT からユーザー情報を抽出
+-- 注意: user_name と prefecture は CASE WHEN でダミーデータを設定している。
+-- これは学習用の簡略化であり、本来はユーザーマスタテーブルから取得する。
 create or replace table MART.DIM_USERS as
 select distinct
   user_id,
@@ -22,6 +30,9 @@ select distinct
   end as prefecture
 from MART.FACT_PURCHASE_EVENTS;
 
+-- DIM_PRODUCTS: FACT から商品情報を抽出
+-- FACT 側に product_name / category を持たせているため（購入時点の記録）、
+-- DIM はその値を distinct で集約したものになる。
 create or replace table MART.DIM_PRODUCTS as
 select distinct
   sku,
@@ -29,6 +40,7 @@ select distinct
   category
 from MART.FACT_PURCHASE_EVENTS;
 
+-- DIM_DATE: FACT のイベント時刻から日付ディメンションを生成
 create or replace table MART.DIM_DATE as
 select distinct
   cast(event_time as date) as date_key,

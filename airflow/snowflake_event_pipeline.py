@@ -1,3 +1,38 @@
+"""
+Snowflake Event Pipeline DAG
+
+このDAGは Snowflake の RAW_EVENTS_PIPE から FACT_PURCHASE_EVENTS へ
+増分ロードを行うパイプラインの最小サンプルです。
+
+【Airflow 接続設定手順】
+このDAGを実行するには Airflow に Snowflake の接続設定が必要です。
+
+1. Airflow UI にログインする
+2. 上部メニューの [Admin] > [Connections] を開く
+3. [+] ボタンで新しい接続を追加する
+4. 以下の項目を入力する:
+     Connection Id : snowflake_default
+     Connection Type: Snowflake
+     Schema        : MART（デフォルトスキーマ）
+     Login         : <Snowflake のユーザー名>
+     Password      : <Snowflake のパスワード>
+     Extra（JSON）  :
+       {
+         "account": "<your_account_locator>",
+         "warehouse": "LEARN_WH",
+         "database": "LEARN_DB",
+         "role": "<your_role>"
+       }
+5. [Save] をクリックして保存する
+
+【DAGの処理フロー】
+  run_raw_load_sql  → EVENTS_PIPE を refresh してファイルを取り込む
+        ↓
+  run_transform_sql → Stream から FACT テーブルへ MERGE する
+        ↓
+  run_quality_check → FACT テーブルの件数を確認する
+"""
+
 from datetime import datetime
 
 from airflow import DAG

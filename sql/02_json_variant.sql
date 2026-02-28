@@ -47,7 +47,11 @@ select parse_json('
   ]
 }');
 
--- JSON path extraction
+-- JSON path で値を取り出す
+-- 構文: raw:<キー名>::<型>
+-- raw:event_id         → JSON の "event_id" フィールド（VARIANT 型）
+-- raw:event_id::string → string 型にキャスト（:: は型変換演算子）
+-- raw:device.os        → ネストしたオブジェクトにはドットでアクセス
 select
   raw:event_id::string as event_id,
   raw:user_id::string as user_id,
@@ -59,7 +63,30 @@ select
 from RAW.RAW_EVENTS
 order by event_id;
 
--- 配列を展開
+-- LATERAL FLATTEN で配列（items）を行に展開する
+--
+-- 【展開イメージ】
+-- 元のデータ（1イベントに2商品の items 配列）:
+--   event_id="e001"
+--     items[0] = {sku:"A001", price:12000}
+--     items[1] = {sku:"B005", price:900}
+--
+-- LATERAL FLATTEN 後（1商品 = 1行 に展開される）:
+--   event_id | sku  | price
+--   ---------|------|------
+--   e001     | A001 | 12000
+--   e001     | B005 |   900
+--   e002     | B005 |   900
+--
+-- 構文の読み方:
+--   lateral flatten(input => raw:items) item
+--     └─ raw:items      : 展開対象の配列フィールド
+--     └─ item           : 展開後の各要素を参照するエイリアス
+--
+-- item.value:<フィールド>::<型> の構造:
+--   item.value          : 展開された1要素（オブジェクト）を参照
+--   item.value:price    : その要素内の "price" フィールド
+--   ::number(10,2)      : 数値型にキャスト（精度10桁、小数2桁）
 select
   raw:event_id::string as event_id,
   item.value:sku::string as sku,

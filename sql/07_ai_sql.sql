@@ -5,6 +5,23 @@
 --
 -- Prerequisite:
 -- grant database role SNOWFLAKE.CORTEX_USER to role <your_role>;
+--
+-- 【CORTEX_USER 権限の取得手順】
+-- AI 関数（AI_COMPLETE / AI_CLASSIFY / AI_EXTRACT）を使うには
+-- SNOWFLAKE.CORTEX_USER データベースロールが必要です。
+--
+-- 1. 自分のロールを確認する:
+--    SELECT current_role();
+--
+-- 2. ACCOUNTADMIN や SYSADMIN で以下を実行する:
+--    -- 例: 自分のロールが SYSADMIN の場合
+--    GRANT DATABASE ROLE SNOWFLAKE.CORTEX_USER TO ROLE SYSADMIN;
+--
+--    -- 例: カスタムロール MY_ROLE に付与する場合
+--    GRANT DATABASE ROLE SNOWFLAKE.CORTEX_USER TO ROLE MY_ROLE;
+--
+-- 3. ロールを切り替えて再ログイン（またはセッションをリフレッシュ）すると
+--    権限が有効になります。Snowsight の場合は一度ログアウト→ログインし直すと確実。
 
 use warehouse LEARN_WH;
 use database LEARN_DB;

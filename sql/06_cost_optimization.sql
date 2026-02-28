@@ -15,6 +15,7 @@ alter warehouse LEARN_WH set
   auto_resume = true;
 
 -- 3. raw JSON を毎回展開するクエリ
+-- 毎回 LATERAL FLATTEN で JSON を解析するためスキャン量が多い（コスト高め）
 select
   raw:event_id::string as event_id,
   item.value:sku::string as sku,
@@ -24,6 +25,7 @@ from RAW.RAW_EVENTS,
 lateral flatten(input => raw:items) item;
 
 -- 4. すでに整形したテーブルを読むクエリ
+-- STAGING に展開済みなのでスキャン量が少なく効率的（コスト低め）
 select
   event_id,
   sku,
@@ -45,12 +47,12 @@ from table(information_schema.query_history_by_warehouse(
 ))
 order by start_time desc;
 
--- Cost memo:
--- - warehouse はまず XSMALL から始める
--- - auto_suspend は短くする
--- - raw JSON の直接参照を常用しない
--- - よく使う列は STAGING / MART に展開する
--- - task の実行頻度を細かくしすぎない
+-- コストメモ:
+-- - ウェアハウスはまず XSMALL から始める（必要なら後でサイズアップ）
+-- - auto_suspend は短く設定してアイドル課金を防ぐ
+-- - RAW JSON の直接参照を常用しない（STAGING/MART に展開する）
+-- - よく使う列は STAGING / MART に整形しておく
+-- - task の実行頻度を細かくしすぎない（ウェアハウスの起動回数が増える）
 
 -- Check.
 show parameters like 'AUTO_SUSPEND' in warehouse LEARN_WH;

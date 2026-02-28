@@ -96,6 +96,21 @@ snowflake-hands-on/
 - 分析しやすい形への変換
 - AI 関数によるテキスト処理
 
+### テーブル対応表
+
+| テーブル | 作成ファイル | スキーマ | 役割 |
+|---|---|---|---|
+| RAW_EVENTS | 02_json_variant.sql | RAW | SQL INSERT で入れた練習用 JSON |
+| RAW_EVENTS_PIPE | 03_snowpipe.sql | RAW | ファイルから COPY INTO する本線用 JSON |
+| RAW_EVENTS_STREAM | 04_streams_tasks.sql | RAW | RAW_EVENTS_PIPE の差分を提供する Stream |
+| STG_EVENTS | 02_json_variant.sql | STAGING | イベント単位に整形（1イベント1行） |
+| STG_EVENT_ITEMS | 02_json_variant.sql | STAGING | 商品明細単位に展開（1商品1行） |
+| REVIEWS | 07_ai_sql.sql | STAGING | AI 関数のテスト用レビューデータ |
+| FACT_PURCHASE_EVENTS | 04_streams_tasks.sql | MART | 購入イベントのファクトテーブル |
+| DIM_USERS | 05_star_schema.sql | MART | ユーザーのディメンションテーブル |
+| DIM_PRODUCTS | 05_star_schema.sql | MART | 商品のディメンションテーブル |
+| DIM_DATE | 05_star_schema.sql | MART | 日付のディメンションテーブル |
+
 ## 章ごとの見方
 
 各 SQL ファイルは同じ読み方にしています。
@@ -118,6 +133,47 @@ snowflake-hands-on/
 - `正規化`: 重複を減らし更新しやすくする
 - `非正規化`: 読みやすさや集計しやすさのために列を持たせる
 - `スタースキーマ`: `fact` と `dimension` に分ける
+
+### データフロー図
+
+```text
+datasets/events_sample.json
+        │
+        │ Snowsight でアップロード（03章）
+        ▼
+  @RAW.EVENT_STAGE（internal stage）
+        │
+        │ COPY INTO（手動）/ Snowpipe（自動）
+        ▼
+  RAW.RAW_EVENTS_PIPE
+        │
+        │ Stream が差分を検知
+        ▼
+  RAW.RAW_EVENTS_STREAM
+        │
+        │ Task が MERGE を定期実行（04章）
+        ▼
+  MART.FACT_PURCHASE_EVENTS
+        │
+        ├──→ MART.DIM_USERS（05章）
+        ├──→ MART.DIM_PRODUCTS（05章）
+        └──→ MART.DIM_DATE（05章）
+```
+
+## 用語早見表
+
+| 用語 | 一言説明 |
+|---|---|
+| VARIANT | JSON などの半構造化データを格納できる Snowflake の型 |
+| Stage | ファイルを一時的に置く場所。internal（Snowflake 内）と external（S3 等）がある |
+| Snowpipe | Stage に置かれたファイルを自動または手動で取り込む仕組み |
+| Stream | テーブルの変更差分（INSERT/UPDATE/DELETE）を追跡するオブジェクト |
+| Task | SQL を定期実行するスケジューラー。CRON 式でスケジュールを指定 |
+| LATERAL FLATTEN | JSON 配列を1要素1行に展開する構文 |
+| metadata$action | Stream が付与する操作種別（'INSERT' / 'DELETE'） |
+| COPY INTO | Stage からテーブルへファイルをロードするコマンド |
+| MERGE | 条件に応じて UPDATE / INSERT を切り替えるアップサート構文 |
+| スタースキーマ | FACT（計測値）と DIMENSION（属性）を分けるデータモデル |
 
 ## 学習スケジュール例
 
@@ -148,3 +204,12 @@ snowflake-hands-on/
 - `Snowpipe` は SQL だけで完結しないため、`datasets/events_sample.json` を Snowsight から stage にアップロードする手順を 1 回だけ挟みます
 - `AI_COMPLETE` の出力はモデルにより多少変わります
 - `AI_CLASSIFY` と `AI_EXTRACT` はコストが発生するため、小さなサンプルで試してください
+
+### Snowsight でファイルをアップロードする詳細手順
+
+1. Snowsight にログインし、左メニューの **Data** をクリック
+2. **Databases** > **LEARN_DB** > **RAW** > **Stages** を展開
+3. **EVENT_STAGE** をクリック
+4. 画面右上の **+ Files** ボタンをクリック
+5. `datasets/events_sample.json` を選択し、アップロードを完了する
+6. アップロード確認: `list @RAW.EVENT_STAGE;` を実行してファイル名が表示されれば成功
