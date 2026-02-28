@@ -1,0 +1,56 @@
+version: 2
+
+sources:
+  - name: RAW
+    database: LEARN_DB
+    schema: RAW
+    tables:
+      - name: RAW_EVENTS_PIPE
+
+models:
+  - name: stg_events
+    description: Flattened event header records from RAW.RAW_EVENTS_PIPE.
+    columns:
+      - name: event_id
+        tests:
+          - not_null
+          - unique
+      - name: user_id
+        tests:
+          - not_null
+
+  - name: stg_event_items
+    description: Flattened purchase line items from event JSON.
+    columns:
+      - name: event_id
+        tests:
+          - not_null
+      - name: sku
+        tests:
+          - not_null
+
+  - name: dim_users
+    description: User dimension for reporting.
+    columns:
+      - name: user_id
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_products
+    description: Product dimension for reporting.
+    columns:
+      - name: sku
+        tests:
+          - not_null
+          - unique
+
+  - name: fct_purchase_events
+    description: Purchase fact table for reporting.
+    columns:
+      - name: event_id
+        tests:
+          - not_null
+      - name: sku
+        tests:
+          - not_null

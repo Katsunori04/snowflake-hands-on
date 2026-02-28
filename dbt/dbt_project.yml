@@ -1,0 +1,12 @@
+name: snowflake_learn
+version: 1.0.0
+config-version: 2
+
+profile: snowflake_learn
+
+model-paths:
+  - models
+
+models:
+  snowflake_learn:
+    +materialized: view

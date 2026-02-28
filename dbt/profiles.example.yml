@@ -1,0 +1,14 @@
+snowflake_learn:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "<your_account_locator>"
+      user: "<your_username>"
+      password: "<your_password>"
+      role: "<your_role>"
+      database: LEARN_DB
+      warehouse: LEARN_WH
+      schema: MART
+      threads: 4
+      client_session_keep_alive: false
