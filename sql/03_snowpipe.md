@@ -206,6 +206,47 @@ order by event_id;
 
 ---
 
+### Step 5（オプション）: GENERATOR で大量テストデータを追加する
+
+ファイル取り込みの 200件だけでは集計行が少ないと感じる場合に、`GENERATOR` を使って一気に 800件の疑似データを追加できます。実行後は合計 ~1000件になります。
+
+```sql
+-- GENERATOR(ROWCOUNT => 800): 800行のダミー行を生成する仮想テーブル
+-- seq4()     : 0始まりの連番（行番号として使う）
+-- UNIFORM()  : 指定範囲の乱数整数を生成
+-- DATEADD()  : 基準日から秒数オフセットを加算して日時を生成
+
+INSERT INTO RAW.RAW_EVENTS_PIPE (raw, src_filename, loaded_at)
+SELECT
+  PARSE_JSON(
+    '{"event_id":"gen_' || seq4()::STRING || '",'
+    || '"user_id":"u' || LPAD(UNIFORM(1, 30, RANDOM())::STRING, 3, '0') || '",'
+    || '"event_type":"purchase",'
+    || '"event_time":"' || DATEADD(second, UNIFORM(0, 7776000, RANDOM()),
+         '2025-12-01'::TIMESTAMP_NTZ)::STRING || 'Z",'
+    || '"device":{"os":"' || CASE MOD(seq4(),3)
+         WHEN 0 THEN 'iOS' WHEN 1 THEN 'Android' ELSE 'PC' END || '","app_version":"2.0.0"},'
+    || '"items":[{"sku":"...", "product_name":"...", "category":"...",
+         "qty":' || UNIFORM(1,3,RANDOM())::STRING || ', "price":...}]}'
+  ),
+  'generated',
+  CURRENT_TIMESTAMP()
+FROM TABLE(GENERATOR(ROWCOUNT => 800));
+```
+
+> **注意**: GENERATOR で生成した行は `src_filename = 'generated'` として記録されます。ファイル由来の行（`src_filename` にファイルパスが入る）と区別できます。
+
+生成後の確認:
+
+```sql
+SELECT src_filename, COUNT(*) AS row_count
+FROM RAW.RAW_EVENTS_PIPE
+GROUP BY src_filename
+ORDER BY src_filename;
+```
+
+---
+
 ## まとめ
 
 | 概念 | ポイント |

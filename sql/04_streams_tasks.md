@@ -17,11 +17,73 @@
 
 ---
 
+## 全体フロー図（03〜04章の連続性）
+
+```mermaid
+flowchart TD
+    F[events_sample.json] -->|Snowsight でアップロード| STG["@RAW.EVENT_STAGE\nファイルの置き場所"]
+    STG -->|COPY INTO 手動 / Snowpipe 自動| PIPE["RAW.RAW_EVENTS_PIPE\nファイルから取り込んだ生データ"]
+    PIPE -->|変更差分を記録| STREAM["RAW.RAW_EVENTS_STREAM\nまだ FACT に反映されていない行"]
+    STREAM -->|Task が定期起動| MERGE["MERGE 処理\n（LATERAL FLATTEN で配列を展開）"]
+    MERGE -->|INSERT / UPDATE| FACT["MART.FACT_PURCHASE_EVENTS\n分析に使う FACT テーブル"]
+
+    subgraph 03章の範囲
+        F
+        STG
+        PIPE
+    end
+    subgraph 04章の範囲
+        STREAM
+        MERGE
+        FACT
+    end
+```
+
+---
+
 ## 概念解説
 
-### Stream の仕組み（差分追跡）
+### Snowpipe と Stream の役割分担
 
-Snowflake の **Stream** は、テーブルへの変更（INSERT / DELETE / UPDATE）を追跡するオブジェクトです。Stream を読み込むと「前回読んだ後に追加・変更されたデータ」だけを取得できます。
+03章で作った Snowpipe と、この章で作る Stream は異なる役割を持ちます。
+
+| | Snowpipe | Stream |
+|---|---|---|
+| **役割** | ファイル → テーブルへの取り込み | テーブルの変更差分の追跡 |
+| **入力** | Stage 上のファイル（JSON など） | テーブルへの INSERT / UPDATE / DELETE |
+| **出力** | テーブル行 | 差分行（`metadata$action` 付き） |
+| **使い方** | Stage にファイルを置くと自動実行（または `ALTER PIPE REFRESH` で手動実行） | MERGE / SELECT 時に未処理の差分行を返す |
+| **「消費」の概念** | なし（取り込んだファイルは記録されるが次回も再実行できる） | **MERGE が成功するとオフセットが進む**。次回は新しい行だけが返る |
+
+> **まとめ**: Snowpipe は「ファイル置き場→テーブル」のパイプ。Stream は「テーブルの変更→差分ビュー」のセンサー。役割が全く異なる。
+
+---
+
+### なぜ Stream が必要か
+
+Stream なしで毎回 `RAW_EVENTS_PIPE` 全件を MERGE するとどうなるか？
+
+```
+RAW_EVENTS_PIPE: 1,000,000 件（毎日1万件ずつ追加される）
+
+【Stream なし（毎回全件 MERGE）】
+1回目: 全 1,000,000 件を MERGE → 遅い
+2回目: 全 1,000,010 件を MERGE → ほぼ同じ処理量が毎回発生
+```
+
+Stream を使うと「最後に読み取ってから追加された行だけ」を追跡できる。
+
+```
+【Stream あり（差分のみ MERGE）】
+1回目: 全 1,000,000 件を MERGE → Stream のオフセットが進む
+2回目: 新規 10 件だけを MERGE → 高速・コスト効率が高い
+```
+
+**重要**: Stream から MERGE が成功するとオフセットが進む。MERGE が失敗した場合（ウェアハウスが起動しないなど）はオフセットは進まず、次回の Task 実行時に同じ行が Stream に再度現れる（**べき等性**）。
+
+---
+
+### Stream の仕組み（差分追跡）
 
 ```
 RAW.RAW_EVENTS_PIPE（テーブル）
@@ -33,9 +95,9 @@ RAW.RAW_EVENTS_STREAM（Stream）
         │ SELECT（未処理の差分だけを返す）
         ▼
    MERGE で FACT に反映
+        │
+        │ ← MERGE 成功でオフセットが進む
 ```
-
-**重要**: Stream は読み込まれると、そのデータが「処理済み」としてクリアされます（次回は新しい差分だけが返る）。
 
 ---
 
@@ -60,8 +122,8 @@ Stream が変更を記録する際、各行に `metadata$action` という操作
 ```
 event_id="e001"
   items = [
-    {"sku": "A001", ...},   ← 1 行目
-    {"sku": "B005", ...}    ← 2 行目
+    {"sku": "A001", ...},   ← 1 行目（e001 × A001）
+    {"sku": "B001", ...}    ← 2 行目（e001 × B001）
   ]
 ```
 
@@ -108,6 +170,8 @@ Task のスケジュールは CRON 式で指定します。
 
 ### Step 1: Stream を作成する
 
+RAW テーブルの変更を追跡する Stream を作成します。
+
 ```sql
 create or replace stream RAW.RAW_EVENTS_STREAM
   on table RAW.RAW_EVENTS_PIPE;
@@ -119,21 +183,21 @@ create or replace stream RAW.RAW_EVENTS_STREAM
 
 ```sql
 create or replace table MART.FACT_PURCHASE_EVENTS (
-  event_id string,
-  user_id string,
-  event_time timestamp_ntz,
-  sku string,
+  event_id     string,
+  user_id      string,
+  event_time   timestamp_ntz,
+  sku          string,
   product_name string,  -- 購入時点の商品名を記録（非正規化）
-  category string,      -- 購入時点のカテゴリを記録（非正規化）
-  qty number,
-  price number(10,2),
-  line_amount number(12,2),
+  category     string,  -- 購入時点のカテゴリを記録（非正規化）
+  qty          number,
+  price        number(10,2),
+  line_amount  number(12,2),
   src_filename string,
-  inserted_at timestamp_ntz default current_timestamp()
+  inserted_at  timestamp_ntz default current_timestamp()
 );
 ```
 
-**設計メモ**: `product_name` と `category` を FACT に持たせているのは「購入時点の商品情報」を記録するためです。商品マスタが後から変わっても、購入当時の名前・カテゴリが保持されます（→ 詳細は01章の補足を参照）。
+**設計メモ**: `product_name` と `category` を FACT に持たせているのは「購入時点の商品情報」を記録するためです。商品マスタが後から変わっても、購入当時の名前・カテゴリが保持されます。
 
 ---
 
@@ -142,9 +206,8 @@ create or replace table MART.FACT_PURCHASE_EVENTS (
 Stream の差分を FACT に MERGE します。まずは手動で実行して動作を確認します。
 
 ```sql
-merge into MART.FACT_PURCHASE_EVENTS tgt
+merge into MART.FACT_PURCHASE_EVENTS tgt    -- ← 書き込み先（FACT テーブル）
 using (
-  -- Stream から INSERT 行のみを取得し、LATERAL FLATTEN で配列を展開
   select
     s.raw:event_id::string as event_id,
     s.raw:user_id::string as user_id,
@@ -156,24 +219,35 @@ using (
     item.value:price::number(10,2) as price,
     item.value:qty::number * item.value:price::number(10,2) as line_amount,
     s.src_filename
-  from RAW.RAW_EVENTS_STREAM s,
+  from RAW.RAW_EVENTS_STREAM s,             -- ← Stream から「未処理の新規行のみ」を取得
   lateral flatten(input => s.raw:items) item
-  where s.metadata$action = 'INSERT'   -- 新規挿入のみ
+  where s.metadata$action = 'INSERT'        -- ← DELETE 行（MERGE 由来）を除外
 ) src
-on tgt.event_id = src.event_id         -- 複合キーで一致判定
+on tgt.event_id = src.event_id              -- ← 重複チェックのキー（複合）
 and tgt.sku = src.sku
-when matched then update set           -- 既存行があれば更新
-  tgt.qty = src.qty,
-  tgt.price = src.price,
+when matched then update set                -- ← 既存行の更新（べき等性の確保）
+  tgt.qty         = src.qty,
+  tgt.price       = src.price,
+  tgt.line_amount = src.line_amount,
   ...
-when not matched then insert (...)     -- 新規行なら挿入
+when not matched then insert (...)          -- ← 新規行の追加
 values (...);
 ```
 
 MERGE 後の確認:
 
 ```sql
-select * from MART.FACT_PURCHASE_EVENTS order by event_time, event_id, sku;
+-- カテゴリ別売上（5行返ること）
+select category, sum(line_amount) as sales
+from MART.FACT_PURCHASE_EVENTS
+group by category
+order by sales desc;
+
+-- 月別件数（3行返ること）
+select date_trunc('month', event_time) as month, count(*) as cnt
+from MART.FACT_PURCHASE_EVENTS
+group by 1
+order by 1;
 ```
 
 ---
@@ -183,15 +257,11 @@ select * from MART.FACT_PURCHASE_EVENTS order by event_time, event_id, sku;
 ```sql
 create or replace task STAGING.LOAD_FACT_PURCHASE_EVENTS
   warehouse = LEARN_WH
-  schedule = 'USING CRON 0/5 * * * * Asia/Tokyo'  -- 5 分ごと
+  schedule  = 'USING CRON 0/5 * * * * Asia/Tokyo'  -- 5 分ごと
 as
 -- ここに Step 3 と同じ MERGE 文を記述（sql/04_streams_tasks.sql を参照）
 ;
-```
 
-Task の開始・停止:
-
-```sql
 -- Task を開始（デフォルトは SUSPENDED 状態）
 alter task STAGING.LOAD_FACT_PURCHASE_EVENTS resume;
 
@@ -199,7 +269,7 @@ alter task STAGING.LOAD_FACT_PURCHASE_EVENTS resume;
 show tasks like 'LOAD_FACT_PURCHASE_EVENTS' in schema STAGING;
 
 -- 必要に応じて停止
-alter task STAGING.LOAD_FACT_PURCHASE_EVENTS suspend;
+-- alter task STAGING.LOAD_FACT_PURCHASE_EVENTS suspend;
 ```
 
 > **注意**: Task は作成直後は `SUSPENDED` 状態です。`alter task ... resume` を実行しないとスケジュールが開始されません。
@@ -214,6 +284,12 @@ select * from RAW.RAW_EVENTS_STREAM;
 
 -- FACT テーブルの内容確認
 select * from MART.FACT_PURCHASE_EVENTS order by event_time, event_id, sku;
+
+-- Task の実行ログを確認
+select *
+from table(information_schema.task_history())
+order by scheduled_time desc
+limit 20;
 ```
 
 ---
@@ -228,7 +304,7 @@ select * from MART.FACT_PURCHASE_EVENTS order by event_time, event_id, sku;
 ```sql
 create or replace task STAGING.LOAD_FACT_PURCHASE_EVENTS
   warehouse = LEARN_WH
-  schedule = 'USING CRON 0 1 * * * Asia/Tokyo'   -- 毎日 01:00 JST
+  schedule  = 'USING CRON 0 1 * * * Asia/Tokyo'   -- 毎日 01:00 JST
 as
 -- ... MERGE 文は同じ
 ;
@@ -250,14 +326,16 @@ alter task STAGING.LOAD_FACT_PURCHASE_EVENTS resume;
 
 | 概念 | ポイント |
 |---|---|
-| Stream | テーブルへの変更（差分）を追跡するオブジェクト |
+| Snowpipe | ファイル → テーブルへの取り込み。Stream とは役割が異なる |
+| Stream | テーブルへの変更（差分）を追跡。MERGE 成功でオフセットが進む |
 | `metadata$action` | Stream が付与する操作種別（INSERT / DELETE） |
 | MERGE | 差分を既存テーブルに「upsert（挿入 or 更新）」する |
+| べき等性 | MERGE が失敗してもオフセットは進まず、次回に再処理される |
 | 複合キー | `event_id + sku` で 1 明細行を一意に特定 |
 | Task | SQL をスケジュール実行するオブジェクト |
 | CRON 式 | `分 時 日 月 曜日 タイムゾーン` の書式 |
 
-次の章では、`FACT_PURCHASE_EVENTS` から DIM テーブルを作成してスタースキーマを完成させます。
+次の章では、MERGE ロジックをストアドプロシージャとして再利用し、Task DAG でより保守しやすいパイプラインを構築します。
 
 ## 参考リンク
 

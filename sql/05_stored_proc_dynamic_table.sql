@@ -4,6 +4,15 @@
 -- - Task の AFTER 句で依存 Task を作り DAG を組む
 -- - Snowflake Alerts で異常を検知・通知する
 
+-- 【04章との違い】
+-- 04章: Task の AS 節に MERGE 文を直書き
+--         Task → MERGE（直書き） → FACT
+-- 05章: MERGE をプロシージャ化し、Task から CALL する
+--         Task → CALL SP → MERGE（SP 内） → FACT
+--
+-- メリット: SP に切り出すと「CALL SP_NAME()」1行でテスト・再利用できる。
+--           Task を修正しなくても SP の内容を変えるだけでロジックを更新できる。
+
 use warehouse LEARN_WH;
 use database LEARN_DB;
 
@@ -11,15 +20,22 @@ use database LEARN_DB;
 -- 1. ストアドプロシージャ
 -- ============================================================
 -- 04章の MERGE ロジックをプロシージャとしてカプセル化する。
--- これにより Task の AS 節に長い MERGE 文を書く代わりに
--- CALL SP_MERGE_PURCHASE_EVENTS() とシンプルに書けるようになる。
+-- これにより:
+--   - Task の AS 節に長い MERGE 文を書く代わりに CALL SP_NAME() と書ける
+--   - CALL MART.SP_MERGE_PURCHASE_EVENTS() でいつでも手動テストできる
+--   - 複数の Task や他の SP からも同じロジックを再利用できる
 
 use schema MART;
 
+-- ストアドプロシージャ: 04章の「Task に直書きしていた MERGE 文」を関数化したもの
+-- RETURNS STRING: 実行結果として文字列を返す
+-- LANGUAGE SQL: Snowflake Scripting（SQL ベース）で記述
+-- $$ ... $$ の中がプロシージャ本体
 CREATE OR REPLACE PROCEDURE MART.SP_MERGE_PURCHASE_EVENTS()
   RETURNS STRING
   LANGUAGE SQL
 AS $$
+  -- 04章の手動 MERGE と同一の処理。内容は変えず「名前をつけて呼び出せる」ようにした。
   MERGE INTO MART.FACT_PURCHASE_EVENTS tgt
   USING (
     SELECT
@@ -59,11 +75,18 @@ AS $$
   RETURN '完了';
 $$;
 
--- Run this first: プロシージャを手動実行して動作確認
+-- プロシージャを手動実行して動作確認
+-- ← 04章の MERGE 手動実行と同じ結果になるはず
 CALL MART.SP_MERGE_PURCHASE_EVENTS();
 
 -- Check: FACT テーブルにデータが入っているか確認
-SELECT * FROM MART.FACT_PURCHASE_EVENTS ORDER BY event_time, event_id, sku;
+SELECT
+  category,
+  SUM(line_amount) AS sales_amount,
+  COUNT(*) AS item_count
+FROM MART.FACT_PURCHASE_EVENTS
+GROUP BY category
+ORDER BY sales_amount DESC;
 
 -- プロシージャの一覧を確認
 SHOW PROCEDURES IN SCHEMA MART;
@@ -72,14 +95,24 @@ SHOW PROCEDURES IN SCHEMA MART;
 -- ============================================================
 -- 2. Dynamic Table
 -- ============================================================
--- Stream + Task の代わりに、「どのようなデータであるべきか」を
--- SELECT 文で宣言するだけで自動更新されるテーブルを作る。
--- LAG = '1 minute' はデータの新鮮さの上限を指定する。
+-- 「どのようなデータであるべきか」を SELECT 文で宣言するだけで
+-- 自動更新されるテーブルを作る。Stream も Task も自分では作らなくてよい。
+--
+-- Stream + Task のアプローチと比べた場合:
+-- | 項目       | Stream + Task               | Dynamic Table        |
+-- |------------|------------------------------|----------------------|
+-- | 記述スタイル | 手続き的（MERGE/INSERT 文）   | 宣言的（SELECT 文）  |
+-- | 更新の仕組み | Task が定期起動して MERGE     | Snowflake が管理     |
+-- | 向いている  | 複雑なロジック・外部連携       | 変換がシンプルな場合 |
 
 use schema STAGING;
 
+-- Dynamic Table: 「このSELECT結果を常に最新に保つ」という宣言。Task 不要。
+-- LAG = '1 minute': 最大 1 分の遅延を許容してリフレッシュする
+--   → リアルタイム性が不要ならコストを抑えられる（即時なら LAG = '0'）
+-- WAREHOUSE: リフレッシュ処理に使うウェアハウス
 CREATE OR REPLACE DYNAMIC TABLE STAGING.DYN_STG_EVENTS
-  LAG       = '1 minute'   -- 最大 1 分の遅延を許容
+  LAG       = '1 minute'
   WAREHOUSE = LEARN_WH
 AS
   SELECT
@@ -112,31 +145,38 @@ LIMIT 10;
 -- ルート Task が PIPE を refresh し、
 -- 完了したら子 Task がプロシージャを CALL する。
 --
--- 実行順:
---   TASK_LOAD_PIPE（5分ごとに起動）
+-- DAG の構造:
+--   TASK_LOAD_PIPE（5分ごとに起動: ルート Task）
 --         │ 完了後に自動起動
 --         ▼
---   TASK_MERGE_FACT（SP_MERGE_PURCHASE_EVENTS を実行）
+--   TASK_MERGE_FACT（SP_MERGE_PURCHASE_EVENTS を実行: 子 Task）
+--
+-- 【resume の順序が重要】
+-- ルート Task を先に resume すると、次のスケジュール実行タイミングで子を起動しようとする。
+-- そのとき子が suspended のままだとルートが完了しても子は実行されない。
+-- → 子を先に resume してからルートを resume することで初回から確実に全ステップが動く。
 
 use schema RAW;
 
--- ルート Task: Pipe を refresh してファイルを取り込む
+-- ルート Task: Pipe を refresh してファイルを取り込む（スケジュールあり）
 CREATE OR REPLACE TASK RAW.TASK_LOAD_PIPE
   WAREHOUSE = LEARN_WH
-  SCHEDULE  = 'USING CRON 0/5 * * * * Asia/Tokyo'
+  SCHEDULE  = 'USING CRON 0/5 * * * * Asia/Tokyo'   -- 5 分ごとに実行
 AS
   ALTER PIPE RAW.EVENTS_PIPE REFRESH;
 
--- 子 Task: ルート Task 完了後にプロシージャを実行
--- AFTER 句で依存する Task を指定する
+-- 子 Task: ルート Task 完了後にプロシージャを実行（スケジュールなし）
+-- AFTER 句で依存する Task を指定する。スケジュールは AFTER が定義すれば不要。
 CREATE OR REPLACE TASK RAW.TASK_MERGE_FACT
   WAREHOUSE = LEARN_WH
-  AFTER     RAW.TASK_LOAD_PIPE
+  AFTER     RAW.TASK_LOAD_PIPE                  -- ← ルートの完了を待って起動
 AS
   CALL MART.SP_MERGE_PURCHASE_EVENTS();
 
--- 子 Task を先に resume してから、ルート Task を resume する
+-- ① 子 Task を先に resume（重要! これを先にしないとルート完了時に子が動かない）
 ALTER TASK RAW.TASK_MERGE_FACT RESUME;
+
+-- ② ルート Task を resume（これで DAG 全体が動き始める）
 ALTER TASK RAW.TASK_LOAD_PIPE  RESUME;
 
 -- Check: Task の状態と依存関係を確認

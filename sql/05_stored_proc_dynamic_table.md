@@ -16,31 +16,48 @@
 
 ---
 
+## 04章との比較：アプローチの違い
+
+```mermaid
+flowchart LR
+    subgraph 04章["04章: Task に直書き"]
+        direction TB
+        T1["Task\n(CRON スケジュール)"] -->|"AS 節に長い MERGE 文"| F1["FACT_PURCHASE_EVENTS"]
+    end
+
+    subgraph 05章SP["05章: Stored Procedure + Task"]
+        direction TB
+        T2["Task\n(CRON スケジュール)"] -->|"CALL"| SP["SP_MERGE_PURCHASE_EVENTS\n(MERGE をカプセル化)"]
+        SP -->|MERGE| F2["FACT_PURCHASE_EVENTS"]
+    end
+
+    subgraph 05章DT["05章: Dynamic Table（宣言的）"]
+        direction TB
+        SRC["RAW_EVENTS_PIPE"] -->|"LAG=1分で自動リフレッシュ\n（Task 不要）"| DT["DYN_STG_EVENTS\n（Dynamic Table）"]
+    end
+```
+
+---
+
+## Task DAG の依存関係図
+
+```mermaid
+flowchart TD
+    ROOT["RAW.TASK_LOAD_PIPE\n（ルート: CRON 0/5 分ごと）\nALTER PIPE RAW.EVENTS_PIPE REFRESH"]
+    -->|"完了後に自動起動"| CHILD["RAW.TASK_MERGE_FACT\n（子: スケジュールなし）\nCALL MART.SP_MERGE_PURCHASE_EVENTS()"]
+```
+
+> **起動順序の注意**: Task を resume するときは **子 Task を先に resume し、ルート Task を後で resume** する。
+> ルートを先に resume すると、次のスケジュール実行タイミングで子を起動しようとするが、
+> そのとき子が suspended のままだと子が動かない。子を先に resume することで初回実行から確実に全ステップが動く。
+
+---
+
 ## 概念解説
 
 ### 手続き的アプローチ vs 宣言的アプローチ
 
 第4章では「Stream を読んで → MERGE する → Task でスケジュール実行する」という **手続き的** なパイプラインを作りました。この章では同じ結果を 2 つのアプローチで実現します。
-
-```
-【手続き的（Stored Procedure + Task）】
-Task が「いつ・何をするか」を明示的に記述する
-
-TASK_LOAD_PIPE ──→ TASK_MERGE_FACT
-  │                   │
-  │ PIPE を refresh   │ SP_MERGE_PURCHASE_EVENTS() を CALL
-  ▼                   ▼
-RAW_EVENTS_PIPE   FACT_PURCHASE_EVENTS
-
-【宣言的（Dynamic Table）】
-「どのようなデータであるべきか」を定義し、更新はシステムに任せる
-
-RAW_EVENTS_PIPE
-  │
-  │ LAG = '1 minute' で自動更新
-  ▼
-DYN_STG_EVENTS（Dynamic Table）
-```
 
 ---
 
@@ -62,7 +79,7 @@ AS $$
   RETURN '完了';
 $$;
 
--- 実行
+-- 実行（手動でも Task からでも同じ CALL 文）
 CALL MART.SP_MERGE_PURCHASE_EVENTS();
 ```
 
@@ -72,37 +89,57 @@ CALL MART.SP_MERGE_PURCHASE_EVENTS();
 
 `SELECT` 文の結果を常に最新の状態に保ち続けるテーブルです。
 
-| 比較項目 | Stream + Task | Dynamic Table |
-|---|---|---|
-| 更新方法 | Task が定期実行 | Snowflake が自動管理 |
-| 記述スタイル | 手続き的（MERGE 文） | 宣言的（SELECT 文） |
-| 適したケース | 複雑な条件・外部連携 | シンプルな変換ロジック |
-| 依存関係 | 手動で Task を連鎖 | 自動で依存を解決 |
-
 ```sql
 CREATE OR REPLACE DYNAMIC TABLE STAGING.DYN_STG_EVENTS
-  LAG = '1 minute'       -- 最大 1 分の遅延を許容
+  LAG       = '1 minute'   -- 最大 1 分の遅延を許容してリフレッシュ
   WAREHOUSE = LEARN_WH
 AS
-  SELECT event_data:event_id::STRING AS event_id, ...
+  SELECT
+    raw:event_id::STRING AS event_id,
+    ...
   FROM RAW.RAW_EVENTS_PIPE;
 ```
 
-`LAG = '1 minute'` は「最大 1 分前のデータまで許容する」という新鮮さの設定です。
+`LAG = '1 minute'` は「最大 1 分前のデータまで許容する」という新鮮さの設定です。`LAG = '0'` にすると即時リフレッシュ（コストが高い）。
+
+---
+
+### どれを使うべきか：選択基準
+
+| | Task + 直書き MERGE（04章） | Stored Procedure + Task（05章） | Dynamic Table（05章） |
+|---|---|---|---|
+| **向いている場面** | 学習・1回きりのシンプル ETL | ロジックを複数箇所から再利用したい | 宣言的に定義したい・遅延 1 分 OK |
+| **ロジックの保守性** | △ Task に埋め込み（変更時は Task を再作成） | ◎ SP で一元管理（CALL 側は変えなくてよい） | ◎ SELECT 文のみ（シンプル） |
+| **複雑なロジック** | ○ | ◎ 変数・分岐・ループも使える | △ SELECT で表現可能な範囲のみ |
+| **手動テスト** | △ MERGE 文をそのままコピーして実行 | ◎ `CALL SP_NAME()` 1 行で実行できる | ◎ Dynamic Table を直接 SELECT で確認 |
+| **他のシステムとの連携** | ○ Task から外部 API は呼べない | ◎ SP 内で EXTERNAL FUNCTION や Python 呼び出しが可能 | △ SELECT で表現可能な範囲のみ |
+
+**実践的な使い分け**:
+- **最初のプロトタイプ**: Task + 直書き MERGE（04章スタイル）でシンプルに作る
+- **保守・チーム開発**: ロジックが複雑になってきたら SP に切り出す
+- **ステージング変換**: SELECT で表現できる変換処理なら Dynamic Table が最もシンプル
+
+---
+
+### Task DAG の「子を先に resume する理由」
+
+```
+【間違った順序】
+1. ルート Task を resume → 次のスケジュール（5分後）が有効になる
+2. 子 Task を resume    → しかし 5分後の実行タイミングに間に合わない場合がある
+   → ルートが完了しても子が suspended のまま → 子が動かない!
+
+【正しい順序】
+1. 子 Task を resume    → 子は suspended が解除されて待機状態に
+2. ルート Task を resume → ルートのスケジュールが有効になる
+   → ルートが完了すると子が自動起動 → 正常に動く ✓
+```
 
 ---
 
 ### Task の依存関係（AFTER 句）
 
 複数の Task を DAG（有向非巡回グラフ）として連鎖させるには `AFTER` 句を使います。
-
-```
-TASK_LOAD_PIPE（ルート Task：CRON スケジュール）
-      │
-      │ 完了したら自動的に起動
-      ▼
-TASK_MERGE_FACT（子 Task：スケジュールなし）
-```
 
 ```sql
 -- ルート Task（スケジュールあり）
@@ -112,15 +149,17 @@ CREATE OR REPLACE TASK RAW.TASK_LOAD_PIPE
 AS
   ALTER PIPE RAW.EVENTS_PIPE REFRESH;
 
--- 子 Task（AFTER で依存を定義）
+-- 子 Task（AFTER で依存を定義。スケジュールは不要）
 CREATE OR REPLACE TASK RAW.TASK_MERGE_FACT
   WAREHOUSE = LEARN_WH
   AFTER     RAW.TASK_LOAD_PIPE          -- ← ここで依存を定義
 AS
   CALL MART.SP_MERGE_PURCHASE_EVENTS();
-```
 
-> **注意**: Task DAG を動かすには、**全ての Task を resume** する必要があります。ルート Task を resume すると子 Task も自動起動を許可されます。
+-- resume は子 → ルートの順
+ALTER TASK RAW.TASK_MERGE_FACT RESUME;   -- ① 子を先に resume
+ALTER TASK RAW.TASK_LOAD_PIPE  RESUME;   -- ② ルートを resume（これで DAG 全体が動く）
+```
 
 ---
 
@@ -144,9 +183,14 @@ CREATE OR REPLACE ALERT MART.ALERT_EMPTY_FACT
 
 ### Step 1: ストアドプロシージャを作成する
 
-第4章の MERGE ロジックをプロシージャ化します。
+第4章の MERGE ロジックをプロシージャ化します。CALL 1 行でテストできるのが大きなメリットです。
 
 ```sql
+-- 04章の「Task に直書きしていた MERGE 文」を SP としてカプセル化
+-- メリット:
+--   - CALL SP_MERGE_PURCHASE_EVENTS() 1行で実行・テストできる
+--   - Task の AS 節がシンプルになる
+--   - SP を修正すれば Task 側は変更不要
 CREATE OR REPLACE PROCEDURE MART.SP_MERGE_PURCHASE_EVENTS()
   RETURNS STRING
   LANGUAGE SQL
@@ -154,14 +198,14 @@ AS $$
   MERGE INTO MART.FACT_PURCHASE_EVENTS tgt
   USING (
     SELECT
-      s.raw:event_id::STRING AS event_id,
-      s.raw:user_id::STRING AS user_id,
+      s.raw:event_id::STRING    AS event_id,
+      s.raw:user_id::STRING     AS user_id,
       TO_TIMESTAMP_NTZ(s.raw:event_time::STRING) AS event_time,
-      item.value:sku::STRING AS sku,
+      item.value:sku::STRING    AS sku,
       item.value:product_name::STRING AS product_name,
-      item.value:category::STRING AS category,
-      item.value:qty::NUMBER AS qty,
-      item.value:price::NUMBER(10,2) AS price,
+      item.value:category::STRING     AS category,
+      item.value:qty::NUMBER          AS qty,
+      item.value:price::NUMBER(10,2)  AS price,
       item.value:qty::NUMBER * item.value:price::NUMBER(10,2) AS line_amount,
       s.src_filename
     FROM RAW.RAW_EVENTS_STREAM s,
@@ -185,7 +229,10 @@ $$;
 動作確認:
 
 ```sql
+-- 手動実行（04章の MERGE 手動実行と同じ結果になる）
 CALL MART.SP_MERGE_PURCHASE_EVENTS();
+
+-- 結果確認
 SELECT * FROM MART.FACT_PURCHASE_EVENTS ORDER BY event_time, event_id, sku;
 ```
 
@@ -193,9 +240,14 @@ SELECT * FROM MART.FACT_PURCHASE_EVENTS ORDER BY event_time, event_id, sku;
 
 ### Step 2: Dynamic Table を作成する
 
-`RAW_EVENTS_PIPE` のデータを常に展開し続ける Dynamic Table を作成します。
+`RAW_EVENTS_PIPE` のデータを常に展開し続ける Dynamic Table を作成します。Task や Stream の定義が不要で、SELECT 文だけで定義できます。
 
 ```sql
+-- 宣言的アプローチ: 「このSELECT結果を常に最新に保つ」と宣言するだけ
+-- Stream も Task も自分で作らなくてよい
+-- LAG = '1 minute': 最大 1 分の遅延を許容してリフレッシュ
+--   → リアルタイム性が不要ならコストを抑えられる
+--   → 即時性が必要なら LAG = '0'（コスト高）
 CREATE OR REPLACE DYNAMIC TABLE STAGING.DYN_STG_EVENTS
   LAG       = '1 minute'
   WAREHOUSE = LEARN_WH
@@ -214,6 +266,7 @@ AS
 更新履歴の確認:
 
 ```sql
+-- 数分待ってから実行するとリフレッシュ記録が見える
 SELECT * FROM TABLE(INFORMATION_SCHEMA.DYNAMIC_TABLE_REFRESH_HISTORY(
   NAME => 'STAGING.DYN_STG_EVENTS'
 ))
@@ -225,25 +278,28 @@ LIMIT 10;
 
 ### Step 3: Task DAG を組む（AFTER 句）
 
-ストアドプロシージャを Task から呼び出し、依存関係を設定します。
+ストアドプロシージャを Task から呼び出し、2 つの Task を依存関係で連鎖させます。
 
 ```sql
--- ルート Task: Pipe を refresh する
+-- ルート Task: Pipe を refresh する（ファイル取り込みをトリガー）
 CREATE OR REPLACE TASK RAW.TASK_LOAD_PIPE
   WAREHOUSE = LEARN_WH
   SCHEDULE  = 'USING CRON 0/5 * * * * Asia/Tokyo'
 AS
   ALTER PIPE RAW.EVENTS_PIPE REFRESH;
 
--- 子 Task: Procedure を CALL する（ルート完了後に自動実行）
+-- 子 Task: ルート完了後に SP を CALL する
+-- AFTER 句でルートを指定するだけ。スケジュールは不要。
 CREATE OR REPLACE TASK RAW.TASK_MERGE_FACT
   WAREHOUSE = LEARN_WH
   AFTER     RAW.TASK_LOAD_PIPE
 AS
   CALL MART.SP_MERGE_PURCHASE_EVENTS();
 
--- 両方を resume する（子 Task を先に resume する）
+-- ① 子を先に resume（重要！）
 ALTER TASK RAW.TASK_MERGE_FACT RESUME;
+
+-- ② ルートを resume（これで DAG 全体が起動する）
 ALTER TASK RAW.TASK_LOAD_PIPE  RESUME;
 ```
 
@@ -292,7 +348,7 @@ SHOW PROCEDURES IN SCHEMA MART;
 -- Dynamic Table の状態確認
 SHOW DYNAMIC TABLES IN SCHEMA STAGING;
 
--- Task の状態確認
+-- Task の状態確認（AFTER 依存関係も確認できる）
 SHOW TASKS IN SCHEMA RAW;
 
 -- Alert の状態確認
@@ -319,9 +375,10 @@ SHOW ALERTS IN SCHEMA MART;
 
 | 概念 | ポイント |
 |---|---|
-| Stored Procedure | SQL ロジックを名前付きでカプセル化。`CALL` で再利用 |
+| Stored Procedure | SQL ロジックを名前付きでカプセル化。`CALL` で再利用。手動テストしやすい |
 | Dynamic Table | `SELECT` を定義するだけで、更新はシステムが管理（宣言的） |
 | Task AFTER 句 | 複数 Task を DAG として連鎖。ルート Task のスケジュールで全体が動く |
+| resume 順序 | **子 Task を先に resume → ルート Task を後で resume** |
 | Alerts | 条件が真になったとき自動的に処理を実行（監視・通知） |
 | TASK_HISTORY | Task の実行ログ・エラーを確認する関数 |
 
