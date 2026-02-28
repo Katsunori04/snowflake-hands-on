@@ -382,6 +382,13 @@ SHOW ALERTS IN SCHEMA MART;
 | Alerts | 条件が真になったとき自動的に処理を実行（監視・通知） |
 | TASK_HISTORY | Task の実行ログ・エラーを確認する関数 |
 
+## よくあるエラーと対処法
+
+| 症状 | 原因 | 対処法 |
+|---|---|---|
+| 子 Task が動かない | ルート Task を先に `RESUME` したため、最初のトリガー時に子がまだ `SUSPENDED` だった | `ALTER TASK RAW.TASK_MERGE_FACT RESUME;` を先に実行し、その後で `ALTER TASK RAW.TASK_LOAD_PIPE RESUME;` を実行する |
+| `SHOW TASKS` では存在するのに期待どおり連鎖しない | `AFTER` 句の依存関係は定義されていても、各 Task の状態は個別に管理される | `SHOW TASKS IN SCHEMA RAW;` で親子とも `state = started` になっているか確認する |
+
 次の章では、`FACT_PURCHASE_EVENTS` から DIM テーブルを作成してスタースキーマを完成させます。
 
 ## 参考リンク

@@ -213,6 +213,13 @@ from STAGING.REVIEWS;
 | `AI_CLASSIFY(text, labels, options)` | テキスト・ラベル配列・オプション | ラベルとスコアの JSON |
 | `AI_EXTRACT(text, schema)` | テキスト・抽出スキーマ | 抽出された情報の JSON |
 
+## よくあるエラーと対処法
+
+| エラー / 症状 | 原因 | 対処法 |
+|---|---|---|
+| `SQL access control error: Insufficient privileges to operate on database role 'CORTEX_USER'` | 実行ロールに `SNOWFLAKE.CORTEX_USER` が付与されていない | 管理権限のあるロールで `GRANT DATABASE ROLE SNOWFLAKE.CORTEX_USER TO ROLE <your_role>;` を実行する |
+| 権限を付与したのに AI 関数がまだ失敗する | セッションが古いロール状態を保持している | `USE ROLE <your_role>;` で切り替え直すか、Snowsight / セッションを再接続してから再実行する |
+
 次の章では、これまでの全章の内容を 1 つのパイプラインとして確認します。
 
 ## 参考リンク
