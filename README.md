@@ -155,47 +155,37 @@ snowflake-hands-on/
 
 ### データフロー図
 
-```text
-datasets/events_sample.json
-        │
-        │ Snowsight でアップロード（03章）
-        ▼
-  @RAW.EVENT_STAGE（internal stage）
-        │
-        │ COPY INTO（手動）/ Snowpipe（自動）
-        ▼
-  RAW.RAW_EVENTS_PIPE
-        │
-        │ Stream が差分を検知
-        ▼
-  RAW.RAW_EVENTS_STREAM
-        │
-        │ Task が MERGE を定期実行（04章）
-        ▼
-  MART.FACT_PURCHASE_EVENTS
-        │
-        ├──→ MART.DIM_USERS（06章）
-        ├──→ MART.DIM_PRODUCTS（06章）
-        └──→ MART.DIM_DATE（06章）
+```mermaid
+flowchart TD
+    A["📁 events_sample.json\n（ローカルファイル）"] -->|"PUT コマンド"| B["@RAW.EVENT_STAGE\n（内部ステージ）（03章）"]
+    B -->|"Snowpipe 自動取込"| C["RAW_EVENTS_PIPE\n（生データテーブル）（03章）"]
+    D["SQL INSERT\n（手動）（02章）"] -->|"練習用"| E["RAW_EVENTS\n（02章 SQL練習用）"]
+    C -->|"Stream 変更検知"| F["STREAM\nRAW_EVENTS_PIPE_STREAM（04章）"]
+    F -->|"Task + MERGE"| G["FACT_PURCHASE_EVENTS\n（ファクトテーブル）（04章・06章）"]
+    G -->|"JOIN"| H["DIM_USERS（06章）"]
+    G -->|"JOIN"| I["DIM_DATE（06章）"]
+    G -->|"JOIN"| J["DIM_PRODUCTS（06章）"]
+    G -->|"Cortex AI分析"| K["AI 分析結果（08章・09章）"]
+    G -->|"Semantic View"| L["Semantic View\n（Cortex Analyst）（09章）"]
 ```
 
 ## 用語早見表
 
-| 用語 | 一言説明 |
-|---|---|
-| VARIANT | JSON などの半構造化データを格納できる Snowflake の型 |
-| Stage | ファイルを一時的に置く場所。internal（Snowflake 内）と external（S3 等）がある |
-| Snowpipe | Stage に置かれたファイルを自動または手動で取り込む仕組み |
-| Stream | テーブルの変更差分（INSERT/UPDATE/DELETE）を追跡するオブジェクト |
-| Task | SQL を定期実行するスケジューラー。CRON 式でスケジュールを指定 |
-| LATERAL FLATTEN | JSON 配列を1要素1行に展開する構文 |
-| metadata$action | Stream が付与する操作種別（'INSERT' / 'DELETE'） |
-| COPY INTO | Stage からテーブルへファイルをロードするコマンド |
-| MERGE | 条件に応じて UPDATE / INSERT を切り替えるアップサート構文 |
-| スタースキーマ | FACT（計測値）と DIMENSION（属性）を分けるデータモデル |
-| Semantic View | メトリクス・ディメンション・リレーションをDBに登録するビジネス定義オブジェクト |
-| Cortex Analyst | Semantic View を使って自然言語の質問を SQL に変換する AI 機能 |
-| Cortex Search | テキストを全文検索とベクトル検索でハイブリッド検索するサービス |
+| 用語 | 一言説明 | 第X章 |
+|---|---|---|
+| VARIANT | JSON などの半構造化データを格納できる Snowflake の型 | 第02章 |
+| Stage | ファイルを一時的に置く場所。internal（Snowflake 内）と external（S3 等）がある | 第03章 |
+| Snowpipe | Stage に置かれたファイルを自動または手動で取り込む仕組み | 第03章 |
+| Stream | テーブルの変更差分（INSERT/UPDATE/DELETE）を追跡するオブジェクト | 第04章 |
+| Task | SQL を定期実行するスケジューラー。CRON 式でスケジュールを指定 | 第04章 |
+| LATERAL FLATTEN | JSON 配列を1要素1行に展開する構文 | 第02章 |
+| metadata$action | Stream が付与する操作種別（'INSERT' / 'DELETE'） | 第04章 |
+| COPY INTO | Stage からテーブルへファイルをロードするコマンド | 第03章 |
+| MERGE | 条件に応じて UPDATE / INSERT を切り替えるアップサート構文 | 第04章 |
+| スタースキーマ | FACT（計測値）と DIMENSION（属性）を分けるデータモデル | 第06章 |
+| Semantic View | メトリクス・ディメンション・リレーションをDBに登録するビジネス定義オブジェクト | 第09章 |
+| Cortex Analyst | Semantic View を使って自然言語の質問を SQL に変換する AI 機能 | 第09章 |
+| Cortex Search | テキストを全文検索とベクトル検索でハイブリッド検索するサービス | 第09章 |
 
 ## 学習スケジュール例
 
