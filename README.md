@@ -28,6 +28,19 @@
 | 第11章 | dbt 入門 | [教材を読む](sql/11_dbt.md) | [dbt/ フォルダ](dbt/) |
 | 第12章 | Airflow 入門 | [教材を読む](sql/12_airflow.md) | [airflow/ フォルダ](airflow/) |
 
+## 付録：SnowPro Core 試験対策
+
+本編（00〜12 章）を終えた後、SnowPro Core 試験の頻出ドメインを付録で補完できます。
+
+| 付録 | テーマ | カバードメイン | 教材テキスト | SQL ファイル |
+|---|---|---|---|---|
+| 付録A1 | アーキテクチャ詳細・マイクロパーティション | D1（25%） | [教材を読む](sql/A1_architecture.md) | [A1_architecture.sql](sql/A1_architecture.sql) |
+| 付録A2 | Time Travel / Fail-safe / Zero-Copy Cloning | D1・D6（35%） | [教材を読む](sql/A2_time_travel_cloning.md) | [A2_time_travel_cloning.sql](sql/A2_time_travel_cloning.sql) |
+| 付録A3 | セキュリティ・RBAC・データマスキング | D2（20%） | [教材を読む](sql/A3_security_rbac.md) | [A3_security_rbac.sql](sql/A3_security_rbac.sql) |
+| 付録A4 | Secure Data Sharing | D1・D6 | [教材を読む](sql/A4_data_sharing.md) | [A4_data_sharing.sql](sql/A4_data_sharing.sql) |
+| 付録A5 | パフォーマンス詳細（キャッシュ・クラスタリング） | D4（15%） | [教材を読む](sql/A5_performance_clustering.md) | [A5_performance_clustering.sql](sql/A5_performance_clustering.sql) |
+| 付録A6 | Snowpark 入門（Python） | D3（20%） | [教材を読む](sql/A6_snowpark.md) | — |
+
 ## 学習ゴール
 
 この教材を終えると、次を説明できる状態を目指します。
@@ -209,6 +222,17 @@ datasets/events_sample.json
 10. Day 10: Semantic View・Cortex（09章）
 11. Day 11: dbt と Airflow（11・12章）
 12. Day 12: 全体復習（10章）
+
+### SnowPro Core 対策プラン（付録 A1〜A6）
+
+本編（00〜12 章）を終えた後、以下の順番で付録を学習することを推奨します。
+
+1. 付録A1: アーキテクチャ詳細（Domain 1 の基盤）
+2. 付録A2: Time Travel / Cloning（Domain 1・6 の頻出テーマ）
+3. 付録A3: RBAC・セキュリティ（Domain 2 の全範囲）
+4. 付録A4: Secure Data Sharing（Domain 1・6 の残り）
+5. 付録A5: パフォーマンス詳細（Domain 4 の残り）
+6. 付録A6: Snowpark（Domain 3 の補完）
 
 ## 補足
 
