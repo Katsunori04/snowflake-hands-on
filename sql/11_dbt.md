@@ -125,6 +125,47 @@ from {{ ref('stg_event_items') }}
 
 dbt がビルド時に依存関係を解析し、正しい順序で実行してくれます。
 
+### dim_users モデル（`dbt/models/dim_users.sql`）
+
+```sql
+select distinct
+  user_id,
+  'Unknown' as user_name,
+  'Unknown' as prefecture
+from {{ ref('stg_events') }}
+```
+
+> **注意（デモ用の簡略化）**: `'Unknown'` はデモ用の定数です。
+> 本番環境では、`source()` マクロを使って実際のユーザーデータソースから取得します。
+>
+> ```sql
+> -- 本番構成の例
+> SELECT user_id, user_name, email
+> FROM {{ source('raw', 'users') }}
+> ```
+
+### fct_purchase_events モデル（`dbt/models/fct_purchase_events.sql`）
+
+```sql
+select
+  event_id,
+  user_id,
+  event_time,
+  sku,
+  product_name,
+  category,
+  qty,
+  price,
+  line_amount,
+  src_filename
+from {{ ref('stg_event_items') }}
+```
+
+> **設計メモ（非正規化の意図）**: `product_name` と `category` をファクトテーブルに持たせているのは、
+> **購入時点の商品情報を保持する**ためです。
+> 後から `DIM_PRODUCTS` の商品名・カテゴリが変更されても、
+> 購入当時の記録が失われない設計になっています（Slowly Changing Dimension Type 1 への対策）。
+
 ---
 
 ## テストの定義
@@ -145,6 +186,29 @@ models:
 ```
 
 手動で確認クエリを書かなくても、`dbt test` でこれらが自動的に検証されます。
+
+---
+
+## 3.5. 接続確認: dbt debug
+
+dbt プロジェクトが正しく設定されているか確認するには `dbt debug` を実行します。
+
+```bash
+dbt debug
+```
+
+**成功時の出力例:**
+```
+All checks passed!
+```
+
+**よくあるエラーと対処法:**
+
+| エラー | 原因 | 対処法 |
+|--------|------|--------|
+| `Could not connect to Snowflake` | 認証情報の誤り・ネットワーク問題 | `profiles.yml` の account / user / password を確認 |
+| `Database 'XXX' does not exist` | データベース名の誤り | `profiles.yml` の database を `ANALYTICS` に修正 |
+| `Insufficient privileges` | スキーマ/ウェアハウスの権限不足 | Snowflake で `GRANT USAGE ON SCHEMA` を実行 |
 
 ---
 
