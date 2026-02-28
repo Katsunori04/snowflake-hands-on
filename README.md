@@ -12,24 +12,19 @@
 
 ## 使い方
 
-1. `sql/00_setup.sql` を実行する
-2. `sql/01_modeling_basics.sql` でテーブル設計の考え方を確認する
-3. `sql/02_json_variant.sql` で JSON を扱う
-4. `datasets/events_sample.json` を stage にアップロードする
-5. `sql/03_snowpipe.sql` で取り込みを作る
-6. `sql/04_streams_tasks.sql` で差分バッチを作る
-7. `sql/05_star_schema.sql` で分析用テーブルを作る
-8. `sql/06_cost_optimization.sql` で運用の基本を確認する
-9. `sql/07_ai_sql.sql` で AI SQL を試す
-10. `sql/08_end_to_end_pipeline.sql` で全体像を復習する
-
-`dbt` と `Airflow` は最後に次の順で読みます。
-
-- `dbt/profiles.example.yml`
-- `dbt/dbt_project.yml`
-- `dbt/models/schema.yml`
-- `dbt/models/*.sql`
-- `airflow/snowflake_event_pipeline.py`
+| 章 | テーマ | 教材テキスト | SQL ファイル |
+|---|---|---|---|
+| 第0章 | 環境準備 | [教材を読む](sql/00_setup.md) | [00_setup.sql](sql/00_setup.sql) |
+| 第1章 | データモデリングの基本 | [教材を読む](sql/01_modeling_basics.md) | [01_modeling_basics.sql](sql/01_modeling_basics.sql) |
+| 第2章 | JSON と VARIANT | [教材を読む](sql/02_json_variant.md) | [02_json_variant.sql](sql/02_json_variant.sql) |
+| 第3章 | ファイル取り込み（Snowpipe） | [教材を読む](sql/03_snowpipe.md) | [03_snowpipe.sql](sql/03_snowpipe.sql) |
+| 第4章 | 増分バッチ（Streams & Tasks） | [教材を読む](sql/04_streams_tasks.md) | [04_streams_tasks.sql](sql/04_streams_tasks.sql) |
+| 第5章 | スタースキーマの構築 | [教材を読む](sql/05_star_schema.md) | [05_star_schema.sql](sql/05_star_schema.sql) |
+| 第6章 | コスト最適化の基本 | [教材を読む](sql/06_cost_optimization.md) | [06_cost_optimization.sql](sql/06_cost_optimization.sql) |
+| 第7章 | AI 関数（Snowflake Cortex） | [教材を読む](sql/07_ai_sql.md) | [07_ai_sql.sql](sql/07_ai_sql.sql) |
+| 第8章 | 全体パイプラインの復習 | [教材を読む](sql/08_end_to_end_pipeline.md) | [08_end_to_end_pipeline.sql](sql/08_end_to_end_pipeline.sql) |
+| 第9章 | dbt 入門 | [教材を読む](sql/09_dbt.md) | [dbt/ フォルダ](dbt/) |
+| 第10章 | Airflow 入門 | [教材を読む](sql/10_airflow.md) | [airflow/ フォルダ](airflow/) |
 
 ## 学習ゴール
 
