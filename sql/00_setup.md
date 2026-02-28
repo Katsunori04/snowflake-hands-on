@@ -156,4 +156,11 @@ show schemas in database LEARN_DB;
 | `LEARN_DB.STAGING` | 整形層 |
 | `LEARN_DB.MART` | 集計・分析層 |
 
+## よくあるエラーと対処法
+
+| エラー | 原因 | 対処法 |
+|---|---|---|
+| `Object 'LEARN_DB' already exists` | 既に同名の DB / Schema / Warehouse がある | 学習環境を作り直すなら `CREATE OR REPLACE` を使うか、不要なオブジェクトを `DROP` してから再実行する |
+| `Insufficient privileges` | `CREATE WAREHOUSE` や `CREATE DATABASE` を実行できるロールではない | 先頭で `USE ROLE SYSADMIN;` を実行し、必要なら管理者に権限付与を依頼する |
+
 次の章では、この 3 層アーキテクチャを使ってデータモデリングの基本を学びます。

@@ -257,6 +257,13 @@ ORDER BY src_filename;
 | PIPE | `COPY INTO` を定義して繰り返し呼び出せるオブジェクト |
 | `auto_ingest` | `true` にするとクラウドイベントと連携して自動取り込み |
 
+## よくあるエラーと対処法
+
+| 症状 | 原因 | 対処法 |
+|---|---|---|
+| Snowsight の Snowpipe UI が読み込み中のままになる | UI 側の表示遅延や一時的な不調 | UI を待ち続けず、`SELECT SYSTEM$PIPE_STATUS('RAW.EVENTS_PIPE');` で取り込み状態を確認する |
+| `COPY INTO` 実行後も行が増えない | Stage に対象ファイルがない、または既に同じファイルを取り込み済み | `LIST @RAW.EVENT_STAGE;` でファイル有無を確認し、再取り込み検証なら `FORCE = TRUE` を使うか別名ファイルで試す |
+
 次の章では、このテーブル（`RAW_EVENTS_PIPE`）を Stream と Task で差分処理する方法を学びます。
 
 ## 参考リンク

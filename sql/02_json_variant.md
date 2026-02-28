@@ -243,6 +243,13 @@ VARIANT 型のフィールドを WHERE 条件に使う場合も、`raw:event_typ
 | `LATERAL FLATTEN` | 配列を 1 要素 = 1 行に展開する |
 | CTAS | `CREATE TABLE AS SELECT` でクエリ結果をテーブル化 |
 
+## よくあるエラーと対処法
+
+| エラー | 原因 | 対処法 |
+|---|---|---|
+| `parse_json(...)` が `NULL` を返す | JSON 文字列の引用符や改行のエスケープが崩れている | まず文字列全体をそのまま見直し、必要なら `parse_json($${ ... }$$)` のようにドルクォートで囲んでエスケープ漏れを避ける |
+| `SQL compilation error: error line ... invalid identifier 'ITEM.VALUE:...'` | `LATERAL FLATTEN` のエイリアス名と参照先が一致していない | `lateral flatten(input => raw:items) item` と書いたら、列参照も `item.value:price` のように同じエイリアス名でそろえる |
+
 次の章では、ファイルから自動的にデータを取り込む Snowpipe を学びます。
 
 ## 参考リンク

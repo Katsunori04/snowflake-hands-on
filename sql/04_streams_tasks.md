@@ -335,6 +335,13 @@ alter task STAGING.LOAD_FACT_PURCHASE_EVENTS resume;
 | Task | SQL をスケジュール実行するオブジェクト |
 | CRON 式 | `分 時 日 月 曜日 タイムゾーン` の書式 |
 
+## よくあるエラーと対処法
+
+| 症状 | 原因 | 対処法 |
+|---|---|---|
+| Stream のオフセットが進まず、同じ差分が残り続ける | MERGE が未実行、失敗、または Task が `SUSPENDED` のまま | `SHOW TASKS LIKE 'LOAD_FACT_PURCHASE_EVENTS' IN SCHEMA STAGING;` で状態を確認し、必要なら `ALTER TASK STAGING.LOAD_FACT_PURCHASE_EVENTS RESUME;` を実行する |
+| Task は作成したのに自動実行されない | 作成直後の Task はデフォルトで停止状態 | `ALTER TASK ... RESUME` を忘れていないか確認し、再作成後も毎回 `RESUME` する |
+
 次の章では、MERGE ロジックをストアドプロシージャとして再利用し、Task DAG でより保守しやすいパイプラインを構築します。
 
 ## 参考リンク
