@@ -95,6 +95,48 @@ item.value:price::number(10,2)
      └───────────────── 展開された1要素（オブジェクト）
 ```
 
+### FLATTEN が返す主な列
+
+`LATERAL FLATTEN` は、展開した要素そのものだけでなく、何番目の要素か・元のどこにあったかも列として返します。
+
+| 列名 | 説明 | `items` 配列を展開したときの例 |
+|---|---|---|
+| `SEQ` | 入力行ごとの連番 | `1`, `2` |
+| `KEY` | オブジェクトのキー名。配列要素では通常 `NULL` | `NULL` |
+| `PATH` | 元データ上のパス | `[0]`, `[1]` |
+| `INDEX` | 配列内の位置 | `0`, `1` |
+| `VALUE` | 展開された要素そのもの（VARIANT 型） | `{"sku":"A001","price":12000,...}` |
+| `THIS` | 展開対象だった元の配列 / オブジェクト | `[{"sku":"A001",...},{"sku":"B005",...}]` |
+
+確認用クエリ:
+
+```sql
+select
+  raw:event_id::string as event_id,
+  item.seq,
+  item.key,
+  item.path,
+  item.index,
+  item.value,
+  item.this
+from RAW.RAW_EVENTS,
+lateral flatten(input => raw:items) item
+order by event_id, item.index;
+```
+
+### `value:price` と書ける理由
+
+`item.value` は VARIANT 型なので、通常の `raw:event_id` と同じ JSON パス構文で中のキーを参照できます。
+
+| 構文 | 意味 |
+|---|---|
+| `item.value` | 展開された 1 要素全体 |
+| `item.value:price` | その要素の `price` キーを取り出す |
+| `item.value:price::number(10,2)` | 取り出した値を数値にキャストする |
+| `item.value:product_name::string` | 同じ要素から商品名を取り出す |
+
+つまり `item.value:price` は「`VALUE` 列に入っている JSON オブジェクトから `price` を読む」という意味です。
+
 ---
 
 ## ハンズオン手順
@@ -212,22 +254,27 @@ select * from STAGING.STG_EVENT_ITEMS order by event_id, sku;
 
 ## Try This
 
-**`event_type = 'purchase'` だけを抽出する WHERE 条件を追加してください。**
+**`event_type = 'purchase'` の `items` だけを展開し、`product_name` ごとの合計金額を集計してください。**
 
 <details>
 <summary>答え例</summary>
 
 ```sql
 select
-  raw:event_id::string as event_id,
-  raw:user_id::string as user_id,
-  raw:event_type::string as event_type
+  item.value:product_name::string as product_name,
+  sum(item.value:qty::number * item.value:price::number(10,2)) as total_amount
 from RAW.RAW_EVENTS
-where raw:event_type::string = 'purchase'   -- ← ここを追加
-order by event_id;
+, lateral flatten(input => raw:items) item
+where raw:event_type::string = 'purchase'
+group by item.value:product_name::string
+order by total_amount desc;
 ```
 
-VARIANT 型のフィールドを WHERE 条件に使う場合も、`raw:event_type::string` のように型変換してから比較します。
+ポイント:
+
+- `where raw:event_type::string = 'purchase'` で購入イベントだけに絞る
+- `item.value:...` で展開済みの各商品要素を読む
+- `sum(qty * price)` で明細金額を集計する
 
 </details>
 
