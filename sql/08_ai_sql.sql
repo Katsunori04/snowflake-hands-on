@@ -53,6 +53,9 @@ insert into STAGING.REVIEWS values
   );
 
 -- 1. AI_COMPLETE: 1文要約
+-- 💰 コスト注意: AI 関数はトークン消費に応じた課金が発生します
+-- 目安: ~$0.008/1,000トークン、1,000行適用で概算 $5〜$20
+-- 推奨: まず LIMIT 10 で動作確認してから全件適用してください
 select
   review_id,
   review_text,
@@ -63,6 +66,9 @@ select
 from STAGING.REVIEWS;
 
 -- 2. AI_CLASSIFY: 感情分類
+-- 💰 コスト注意: AI 関数はトークン消費に応じた課金が発生します
+-- 目安: ~$0.008/1,000トークン、1,000行適用で概算 $5〜$20
+-- 推奨: まず LIMIT 10 で動作確認してから全件適用してください
 select
   review_id,
   AI_CLASSIFY(
@@ -77,6 +83,9 @@ select
 from STAGING.REVIEWS;
 
 -- 3. AI_EXTRACT: 何について書かれているかを抽出
+-- 💰 コスト注意: AI 関数はトークン消費に応じた課金が発生します
+-- 目安: ~$0.008/1,000トークン、1,000行適用で概算 $5〜$20
+-- 推奨: まず LIMIT 10 で動作確認してから全件適用してください
 select
   review_id,
   AI_EXTRACT(
@@ -90,6 +99,9 @@ select
 from STAGING.REVIEWS;
 
 -- 4. structured data と合わせる例
+-- 💰 コスト注意: AI 関数はトークン消費に応じた課金が発生します
+-- 目安: ~$0.008/1,000トークン、1,000行適用で概算 $5〜$20
+-- 推奨: まず LIMIT 10 で動作確認してから全件適用してください
 select
   e.event_id,
   e.user_id,
@@ -109,3 +121,19 @@ select * from STAGING.REVIEWS order by review_id;
 
 -- Try this:
 -- AI_CLASSIFY のラベルを sentiment ではなく product / delivery / usability に変えてみてください。
+
+-- ============================================================
+-- AI 関数のコスト確認
+-- ============================================================
+
+-- AI サービスの利用コストを日別に確認
+-- ※ ACCOUNT_USAGE ビューはリアルタイムではなく最大3時間遅延があります
+SELECT
+    USAGE_DATE,
+    SERVICE_TYPE,
+    CREDITS_USED,
+    CREDITS_USED * 3 AS ESTIMATED_COST_USD  -- $3/クレジットの概算
+FROM SNOWFLAKE.ACCOUNT_USAGE.METERING_DAILY_HISTORY
+WHERE SERVICE_TYPE = 'AI_SERVICES'
+ORDER BY USAGE_DATE DESC
+LIMIT 30;
