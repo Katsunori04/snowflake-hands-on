@@ -17,6 +17,29 @@
 --       ↓ Task が定期的に MERGE を実行（この章）
 --   FACT_PURCHASE_EVENTS（分析用 FACT テーブル）
 
+-- ============================================================
+-- 【Stream の時系列フロー】
+-- ============================================================
+-- 1. データ INSERT
+--    → Stream にオフセット付き変更行が積まれる
+--      （各行に metadata$action='INSERT', metadata$isupdate=false が付く）
+--
+-- 2. Task が起動（スケジュールまたは手動）
+--    → Stream から WHERE metadata$action='INSERT' で新規行を取得
+--    → MERGE ステートメントを実行
+--
+-- 3. MERGE で FACT テーブルに挿入/更新
+--    → WHEN MATCHED    : 既存行を UPDATE
+--    → WHEN NOT MATCHED: 新規行を INSERT
+--
+-- 4. MERGE 成功 → Stream のオフセットが進む
+--    → 次回 Stream を参照すると、処理済み行は見えなくなる
+--    → 新しい変更行のみが Stream に現れる
+--
+-- ※ MERGE 実行後の Stream には DELETE メタ行が記録されるが、
+--    metadata$action='INSERT' フィルタで除外することで二重処理を防ぐ
+-- ============================================================
+
 use warehouse LEARN_WH;
 use database LEARN_DB;
 use schema RAW;
