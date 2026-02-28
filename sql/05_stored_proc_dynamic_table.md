@@ -123,17 +123,37 @@ AS
 
 ### Task DAG の「子を先に resume する理由」
 
-```
-【間違った順序】
-1. ルート Task を resume → 次のスケジュール（5分後）が有効になる
-2. 子 Task を resume    → しかし 5分後の実行タイミングに間に合わない場合がある
-   → ルートが完了しても子が suspended のまま → 子が動かない!
+```mermaid
+sequenceDiagram
+  participant U as ユーザー
+  participant P as 親 Task
+  participant C as 子 Task
 
-【正しい順序】
-1. 子 Task を resume    → 子は suspended が解除されて待機状態に
-2. ルート Task を resume → ルートのスケジュールが有効になる
-   → ルートが完了すると子が自動起動 → 正常に動く ✓
+  rect rgb(232, 245, 233)
+    Note over U,C: 正しい順序（子 -> 親）
+    U->>C: ALTER TASK RAW.TASK_MERGE_FACT RESUME
+    Note over C: 子は started 状態で待機
+    U->>P: ALTER TASK RAW.TASK_LOAD_PIPE RESUME
+    P->>P: 次回スケジュールで実行
+    P-->>C: AFTER 依存で子を起動
+    C->>C: CALL SP_MERGE_PURCHASE_EVENTS()
+  end
+
+  rect rgb(255, 235, 238)
+    Note over U,C: 誤った順序（親 -> 子）
+    U->>P: ALTER TASK RAW.TASK_LOAD_PIPE RESUME
+    P->>P: 次回スケジュールで実行
+    P--xC: 子は SUSPENDED のため起動されない
+    U->>C: ALTER TASK RAW.TASK_MERGE_FACT RESUME
+    Note over C: その後 started になっても、落とした初回トリガーは戻らない
+  end
 ```
+
+理由を整理すると次の 3 点です。
+
+1. 親 Task を `RESUME` すると、その時点で次回のスケジュール実行が有効になります。
+2. 親が完了した瞬間に `AFTER` 先の子 Task が `started` でなければ、その実行タイミングでは子が動きません。
+3. そのため、先に子を待機状態にしてから親を開始すると、初回実行から DAG 全体が確実に連鎖します。
 
 ---
 
