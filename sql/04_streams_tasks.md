@@ -258,3 +258,10 @@ alter task STAGING.LOAD_FACT_PURCHASE_EVENTS resume;
 | CRON 式 | `分 時 日 月 曜日 タイムゾーン` の書式 |
 
 次の章では、`FACT_PURCHASE_EVENTS` から DIM テーブルを作成してスタースキーマを完成させます。
+
+## 参考リンク
+
+- [Stream の概要](https://docs.snowflake.com/en/user-guide/streams-intro)
+- [MERGE 文](https://docs.snowflake.com/en/sql-reference/sql/merge)
+- [Task の概要](https://docs.snowflake.com/en/user-guide/tasks-intro)
+- [TASK_HISTORY 関数](https://docs.snowflake.com/en/sql-reference/functions/task_history)

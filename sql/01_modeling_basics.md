@@ -210,3 +210,8 @@ order by sales_amount desc;
 | MART 層 | スタースキーマで集計しやすい形を置く |
 
 次の章では、JSON データ（VARIANT 型）の扱い方を学びます。
+
+## 参考リンク
+
+- [テーブルの種類（Permanent / Transient / Temporary）](https://docs.snowflake.com/en/user-guide/tables-temp-transient)
+- [データ型の一覧](https://docs.snowflake.com/en/sql-reference/intro-summary-data-types)

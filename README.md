@@ -38,6 +38,10 @@
 - `fact` と `dimension` を分ける理由を理解する
 - Snowflake の基本的なコスト最適化を説明する
 - `AI_COMPLETE`、`AI_CLASSIFY`、`AI_EXTRACT` を SQL から使う
+- ストアドプロシージャと Dynamic Table の使い分けを説明する
+- Semantic View でビジネス定義（メトリクス・ディメンション）をDBに登録する
+- Cortex Analyst で自然言語クエリを実現する仕組みを理解する
+- Cortex Search でハイブリッド検索サービスを構築する
 - `dbt` と `Airflow` の役割差を説明する
 
 ## ディレクトリ構成
@@ -106,6 +110,9 @@ snowflake-hands-on/
 | STG_EVENT_ITEMS | 02_json_variant.sql | STAGING | 商品明細単位に展開（1商品1行） |
 | REVIEWS | 08_ai_sql.sql | STAGING | AI 関数のテスト用レビューデータ |
 | FACT_PURCHASE_EVENTS | 04_streams_tasks.sql | MART | 購入イベントのファクトテーブル |
+| DYN_STG_EVENTS | 05_stored_proc_dynamic_table.sql | STAGING | Dynamic Table（RAW_EVENTS_PIPE を常時展開） |
+| SEM_PURCHASE_EVENTS | 09_semantic_view_cortex.sql | MART | ビジネス定義を登録した Semantic View |
+| REVIEW_SEARCH | 09_semantic_view_cortex.sql | STAGING | レビューのフルテキスト+ベクトル検索サービス |
 | DIM_USERS | 06_star_schema.sql | MART | ユーザーのディメンションテーブル |
 | DIM_PRODUCTS | 06_star_schema.sql | MART | 商品のディメンションテーブル |
 | DIM_DATE | 06_star_schema.sql | MART | 日付のディメンションテーブル |
@@ -154,9 +161,9 @@ datasets/events_sample.json
         ▼
   MART.FACT_PURCHASE_EVENTS
         │
-        ├──→ MART.DIM_USERS（05章）
-        ├──→ MART.DIM_PRODUCTS（05章）
-        └──→ MART.DIM_DATE（05章）
+        ├──→ MART.DIM_USERS（06章）
+        ├──→ MART.DIM_PRODUCTS（06章）
+        └──→ MART.DIM_DATE（06章）
 ```
 
 ## 用語早見表
@@ -188,18 +195,20 @@ datasets/events_sample.json
 5. Day 5: `07_cost_optimization.sql`, `08_ai_sql.sql`
 6. Day 6: `09_semantic_view_cortex.sql`, `dbt`, `airflow`, `10_end_to_end_pipeline.sql`
 
-### 10日プラン
+### 12日プラン
 
-1. Day 1: 環境準備
-2. Day 2: 設計の基本
-3. Day 3: JSON
-4. Day 4: Snowpipe
-5. Day 5: Streams
-6. Day 6: Tasks
-7. Day 7: Star schema
-8. Day 8: Cost optimization
-9. Day 9: AI SQL
-10. Day 10: dbt, Airflow, 総復習
+1. Day 1:  環境準備（00章）
+2. Day 2:  データモデリング基本（01章）
+3. Day 3:  JSON と VARIANT（02章）
+4. Day 4:  ファイル取り込み（03章）
+5. Day 5:  増分バッチ（04章）
+6. Day 6:  処理の再利用（05章）
+7. Day 7:  スタースキーマ（06章）
+8. Day 8:  コスト最適化（07章）
+9. Day 9:  AI 関数（08章）
+10. Day 10: Semantic View・Cortex（09章）
+11. Day 11: dbt と Airflow（11・12章）
+12. Day 12: 全体復習（10章）
 
 ## 補足
 

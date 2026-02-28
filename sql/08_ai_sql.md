@@ -214,3 +214,11 @@ from STAGING.REVIEWS;
 | `AI_EXTRACT(text, schema)` | テキスト・抽出スキーマ | 抽出された情報の JSON |
 
 次の章では、これまでの全章の内容を 1 つのパイプラインとして確認します。
+
+## 参考リンク
+
+- [Cortex LLM 関数の概要](https://docs.snowflake.com/en/user-guide/snowflake-cortex/llm-functions)
+- [AI_COMPLETE（COMPLETE 関数）](https://docs.snowflake.com/en/sql-reference/functions/complete-snowflake-cortex)
+- [AI_CLASSIFY（CLASSIFY_TEXT 関数）](https://docs.snowflake.com/en/sql-reference/functions/classify-text-snowflake-cortex)
+- [AI_EXTRACT（EXTRACT_ANSWER 関数）](https://docs.snowflake.com/en/sql-reference/functions/extract-answer-snowflake-cortex)
+- [CORTEX_USER ロールの付与](https://docs.snowflake.com/en/user-guide/snowflake-cortex/llm-functions#required-privileges)

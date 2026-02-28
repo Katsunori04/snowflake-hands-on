@@ -326,3 +326,13 @@ SHOW ALERTS IN SCHEMA MART;
 | TASK_HISTORY | Task の実行ログ・エラーを確認する関数 |
 
 次の章では、`FACT_PURCHASE_EVENTS` から DIM テーブルを作成してスタースキーマを完成させます。
+
+## 参考リンク
+
+- [ストアドプロシージャの概要](https://docs.snowflake.com/en/developer-guide/stored-procedure/stored-procedures-overview)
+- [CREATE PROCEDURE](https://docs.snowflake.com/en/sql-reference/sql/create-procedure)
+- [Dynamic Table の概要](https://docs.snowflake.com/en/user-guide/dynamic-tables-intro)
+- [CREATE DYNAMIC TABLE](https://docs.snowflake.com/en/sql-reference/sql/create-dynamic-table)
+- [Task の依存関係（DAG）](https://docs.snowflake.com/en/user-guide/tasks-graphs)
+- [Snowflake Alerts の概要](https://docs.snowflake.com/en/user-guide/alerts)
+- [CREATE ALERT](https://docs.snowflake.com/en/sql-reference/sql/create-alert)

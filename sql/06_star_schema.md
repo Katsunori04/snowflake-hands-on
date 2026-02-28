@@ -190,3 +190,8 @@ DIM_PRODUCTS ── FACT_PURCHASE_EVENTS ── DIM_DATE
 | `DIM_DATE` | 日付属性（年・月・日） |
 
 次の章では、このパイプラインのコスト最適化の基本を学びます。
+
+## 参考リンク
+
+- [テーブル設計の考え方](https://docs.snowflake.com/en/user-guide/table-considerations)
+- [CREATE TABLE](https://docs.snowflake.com/en/sql-reference/sql/create-table)

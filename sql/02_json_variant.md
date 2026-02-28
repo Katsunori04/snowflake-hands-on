@@ -244,3 +244,9 @@ VARIANT 型のフィールドを WHERE 条件に使う場合も、`raw:event_typ
 | CTAS | `CREATE TABLE AS SELECT` でクエリ結果をテーブル化 |
 
 次の章では、ファイルから自動的にデータを取り込む Snowpipe を学びます。
+
+## 参考リンク
+
+- [VARIANT 型の概要](https://docs.snowflake.com/en/user-guide/semistructured-intro)
+- [半構造化データのクエリ](https://docs.snowflake.com/en/user-guide/querying-semistructured)
+- [FLATTEN 関数](https://docs.snowflake.com/en/sql-reference/functions/flatten)

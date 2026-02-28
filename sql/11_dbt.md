@@ -193,3 +193,9 @@ dbt docs serve
 | `dbt docs` | データカタログを自動生成 |
 
 次の章では、Airflow を使って Snowflake のパイプラインをオーケストレーションする方法を学びます。
+
+## 参考リンク
+
+- [dbt ドキュメント](https://docs.getdbt.com/)
+- [dbt Snowflake アダプタ](https://docs.getdbt.com/docs/core/connect-data-platform/snowflake-setup)
+- [Snowflake + dbt 連携ガイド](https://docs.snowflake.com/en/user-guide/ecosystem-dbt)

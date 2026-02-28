@@ -365,3 +365,14 @@ SELECT SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
 | Cortex Search | テキストを全文+ベクトルでハイブリッド検索 | SQL（SEARCH_PREVIEW）/ REST API |
 
 次の章では、01〜09章で構築したパイプライン全体を俯瞰して確認します。
+
+## 参考リンク
+
+- [Semantic View の概要](https://docs.snowflake.com/en/user-guide/views-semantic/overview)
+- [CREATE SEMANTIC VIEW](https://docs.snowflake.com/en/sql-reference/sql/create-semantic-view)
+- [Semantic View のベストプラクティス](https://docs.snowflake.com/en/user-guide/views-semantic/best-practices-dev)
+- [Cortex Analyst の概要](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-analyst)
+- [Cortex Analyst REST API](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-analyst/rest-api)
+- [Cortex Search の概要](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-search/cortex-search-overview)
+- [CREATE CORTEX SEARCH SERVICE](https://docs.snowflake.com/en/sql-reference/sql/create-cortex-search)
+- [SEARCH_PREVIEW 関数](https://docs.snowflake.com/en/sql-reference/functions/search_preview-snowflake-cortex)

@@ -189,3 +189,9 @@ show parameters like 'AUTO_SUSPEND' in warehouse LEARN_WH;
 | Task の頻度 | ビジネス要件の鮮度に合わせた頻度に設定 |
 
 次の章では、Snowflake Cortex の AI 関数でテキストデータを分析します。
+
+## 参考リンク
+
+- [Virtual Warehouse の概要](https://docs.snowflake.com/en/user-guide/warehouses-overview)
+- [コスト管理の概要](https://docs.snowflake.com/en/user-guide/cost-understanding-compute)
+- [QUERY_HISTORY ビュー](https://docs.snowflake.com/en/sql-reference/account-usage/query_history)

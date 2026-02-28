@@ -155,3 +155,8 @@ SQL の中で AI が日本語要約を生成することを確認します。
 9. **セマンティック・検索**（09章）: Semantic View・Cortex Analyst・Cortex Search
 
 これらを組み合わせることで、JSON のイベントデータからスタースキーマの分析基盤まで、Snowflake 内で完結するパイプラインを構築できます。
+
+## 参考リンク
+
+- [Snowflake ドキュメント トップ](https://docs.snowflake.com/en/)
+- [Snowflake アーキテクチャの概要](https://docs.snowflake.com/en/user-guide/intro-key-concepts)

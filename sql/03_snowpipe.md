@@ -217,3 +217,9 @@ order by event_id;
 | `auto_ingest` | `true` にするとクラウドイベントと連携して自動取り込み |
 
 次の章では、このテーブル（`RAW_EVENTS_PIPE`）を Stream と Task で差分処理する方法を学びます。
+
+## 参考リンク
+
+- [Internal Stage の概要](https://docs.snowflake.com/en/user-guide/data-load-local-file-system-create-stage)
+- [COPY INTO（テーブルへ）](https://docs.snowflake.com/en/sql-reference/sql/copy-into-table)
+- [Snowpipe の概要](https://docs.snowflake.com/en/user-guide/data-load-snowpipe-intro)
