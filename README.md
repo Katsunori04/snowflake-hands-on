@@ -1,4 +1,4 @@
-# Snowflake Hands-On for Beginners
+# Snowflake Data Pipeline Hands-On for Beginners
 
 `SELECT` は書けるが、Snowflake のパイプライン構築、バッチ処理、AI 関数、基本的なデータモデリングはこれから、という学習者向けの教材です。
 
