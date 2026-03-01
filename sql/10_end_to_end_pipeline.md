@@ -160,3 +160,10 @@ SQL の中で AI が日本語要約を生成することを確認します。
 
 - [Snowflake ドキュメント トップ](https://docs.snowflake.com/en/)
 - [Snowflake アーキテクチャの概要](https://docs.snowflake.com/en/user-guide/intro-key-concepts)
+
+## 学習チェックリスト
+
+- [ ] ファイル取り込み → Stream → Task → スタースキーマの全フローを説明できる
+- [ ] 各コンポーネント（Stage / Pipe / Stream / Task / Dynamic Table）の役割を区別できる
+- [ ] パイプラインの監視方法（ACCOUNT_USAGE / PIPE_STATUS 等）を知っている
+- [ ] 自分のユースケースでどのコンポーネントを使うか判断できる
