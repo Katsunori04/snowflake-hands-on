@@ -231,7 +231,7 @@ model = LinearRegression(input_cols=["AMOUNT_SCALED"], label_cols=["TARGET"])
 model.fit(df_scaled)
 ```
 
-> **補足**: Snowpark ML の詳細は [Snowflake 公式ドキュメント](https://docs.snowflake.com/en/developer-guide/snowpark-ml/index) を参照。
+> **補足**: Snowpark ML の詳細は [Snowflake 公式ドキュメント](https://docs.snowflake.com/ja/developer-guide/snowpark-ml/index) を参照。
 
 ---
 
