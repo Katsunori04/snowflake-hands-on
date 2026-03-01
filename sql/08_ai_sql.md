@@ -232,7 +232,7 @@ from STAGING.REVIEWS;
 
 ## 学習チェックリスト
 
-- [ ] `SNOWFLAKE.CORTEX.COMPLETE()` でテキスト生成ができた
-- [ ] `SENTIMENT()` でレビューのセンチメント分析ができた
-- [ ] `TRANSLATE()` でテキスト翻訳ができた
+- [ ] `AI_COMPLETE()` でテキスト生成・要約ができた
+- [ ] `AI_CLASSIFY()` で感情分類（ポジティブ／ネガティブ）ができた
+- [ ] `AI_EXTRACT()` で構造化情報の抽出ができた
 - [ ] Cortex 関数がウェアハウス上で実行される仕組みを理解した
