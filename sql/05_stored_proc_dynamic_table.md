@@ -413,10 +413,17 @@ SHOW ALERTS IN SCHEMA MART;
 
 ## 参考リンク
 
-- [ストアドプロシージャの概要](https://docs.snowflake.com/en/developer-guide/stored-procedure/stored-procedures-overview)
-- [CREATE PROCEDURE](https://docs.snowflake.com/en/sql-reference/sql/create-procedure)
-- [Dynamic Table の概要](https://docs.snowflake.com/en/user-guide/dynamic-tables-intro)
-- [CREATE DYNAMIC TABLE](https://docs.snowflake.com/en/sql-reference/sql/create-dynamic-table)
-- [Task の依存関係（DAG）](https://docs.snowflake.com/en/user-guide/tasks-graphs)
-- [Snowflake Alerts の概要](https://docs.snowflake.com/en/user-guide/alerts)
-- [CREATE ALERT](https://docs.snowflake.com/en/sql-reference/sql/create-alert)
+- [ストアドプロシージャの概要](https://docs.snowflake.com/ja/developer-guide/stored-procedure/stored-procedures-overview)
+- [CREATE PROCEDURE](https://docs.snowflake.com/ja/sql-reference/sql/create-procedure)
+- [Dynamic Table の概要](https://docs.snowflake.com/ja/user-guide/dynamic-tables-intro)
+- [CREATE DYNAMIC TABLE](https://docs.snowflake.com/ja/sql-reference/sql/create-dynamic-table)
+- [Task の依存関係（DAG）](https://docs.snowflake.com/ja/user-guide/tasks-graphs)
+- [Snowflake Alerts の概要](https://docs.snowflake.com/ja/user-guide/alerts)
+- [CREATE ALERT](https://docs.snowflake.com/ja/sql-reference/sql/create-alert)
+
+## 学習チェックリスト
+
+- [ ] ストアドプロシージャを作成して CALL で実行できた
+- [ ] Dynamic Table を作成して自動更新の仕組みを確認した
+- [ ] Task の DAG（依存関係）を設定できた
+- [ ] Alert を作成してデータ品質監視を設定できた

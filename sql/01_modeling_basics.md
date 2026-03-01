@@ -213,5 +213,12 @@ order by sales_amount desc;
 
 ## 参考リンク
 
-- [テーブルの種類（Permanent / Transient / Temporary）](https://docs.snowflake.com/en/user-guide/tables-temp-transient)
-- [データ型の一覧](https://docs.snowflake.com/en/sql-reference/intro-summary-data-types)
+- [テーブルの種類（Permanent / Transient / Temporary）](https://docs.snowflake.com/ja/user-guide/tables-temp-transient)
+- [データ型の一覧](https://docs.snowflake.com/ja/sql-reference/intro-summary-data-types)
+
+## 学習チェックリスト
+
+- [ ] ノーマライズとデノーマライズの違いを説明できる
+- [ ] ディメンションテーブルとファクトテーブルの役割を区別できる
+- [ ] Snowflake でテーブルを作成してデータを挿入できた
+- [ ] スタースキーマとスノーフレークスキーマの違いを理解した

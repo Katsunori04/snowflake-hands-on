@@ -158,8 +158,8 @@ SQL の中で AI が日本語要約を生成することを確認します。
 
 ## 参考リンク
 
-- [Snowflake ドキュメント トップ](https://docs.snowflake.com/en/)
-- [Snowflake アーキテクチャの概要](https://docs.snowflake.com/en/user-guide/intro-key-concepts)
+- [Snowflake ドキュメント トップ](https://docs.snowflake.com/ja/)
+- [Snowflake アーキテクチャの概要](https://docs.snowflake.com/ja/user-guide/intro-key-concepts)
 
 ## 学習チェックリスト
 

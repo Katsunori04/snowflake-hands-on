@@ -357,14 +357,14 @@ SELECT SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
 
 ## 参考リンク
 
-- [Semantic View の概要](https://docs.snowflake.com/en/user-guide/views-semantic/overview)
-- [CREATE SEMANTIC VIEW](https://docs.snowflake.com/en/sql-reference/sql/create-semantic-view)
-- [Semantic View のベストプラクティス](https://docs.snowflake.com/en/user-guide/views-semantic/best-practices-dev)
-- [Cortex Analyst の概要](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-analyst)
-- [Cortex Analyst REST API](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-analyst/rest-api)
-- [Cortex Search の概要](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-search/cortex-search-overview)
-- [CREATE CORTEX SEARCH SERVICE](https://docs.snowflake.com/en/sql-reference/sql/create-cortex-search)
-- [SEARCH_PREVIEW 関数](https://docs.snowflake.com/en/sql-reference/functions/search_preview-snowflake-cortex)
+- [Semantic View の概要](https://docs.snowflake.com/ja/user-guide/views-semantic/overview)
+- [CREATE SEMANTIC VIEW](https://docs.snowflake.com/ja/sql-reference/sql/create-semantic-view)
+- [Semantic View のベストプラクティス](https://docs.snowflake.com/ja/user-guide/views-semantic/best-practices-dev)
+- [Cortex Analyst の概要](https://docs.snowflake.com/ja/user-guide/snowflake-cortex/cortex-analyst)
+- [Cortex Analyst REST API](https://docs.snowflake.com/ja/user-guide/snowflake-cortex/cortex-analyst/rest-api)
+- [Cortex Search の概要](https://docs.snowflake.com/ja/user-guide/snowflake-cortex/cortex-search/cortex-search-overview)
+- [CREATE CORTEX SEARCH SERVICE](https://docs.snowflake.com/ja/sql-reference/sql/create-cortex-search)
+- [SEARCH_PREVIEW 関数](https://docs.snowflake.com/ja/sql-reference/functions/search_preview-snowflake-cortex)
 
 ## 学習チェックリスト
 

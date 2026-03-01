@@ -224,15 +224,15 @@ from STAGING.REVIEWS;
 
 ## 参考リンク
 
-- [Cortex LLM 関数の概要](https://docs.snowflake.com/en/user-guide/snowflake-cortex/llm-functions)
-- [AI_COMPLETE（COMPLETE 関数）](https://docs.snowflake.com/en/sql-reference/functions/complete-snowflake-cortex)
-- [AI_CLASSIFY（CLASSIFY_TEXT 関数）](https://docs.snowflake.com/en/sql-reference/functions/classify-text-snowflake-cortex)
-- [AI_EXTRACT（EXTRACT_ANSWER 関数）](https://docs.snowflake.com/en/sql-reference/functions/extract-answer-snowflake-cortex)
-- [CORTEX_USER ロールの付与](https://docs.snowflake.com/en/user-guide/snowflake-cortex/llm-functions#required-privileges)
+- [Cortex LLM 関数の概要](https://docs.snowflake.com/ja/user-guide/snowflake-cortex/llm-functions)
+- [AI_COMPLETE（COMPLETE 関数）](https://docs.snowflake.com/ja/sql-reference/functions/complete-snowflake-cortex)
+- [AI_CLASSIFY](https://docs.snowflake.com/ja/sql-reference/functions/ai_classify)
+- [AI_EXTRACT](https://docs.snowflake.com/ja/ja/sql-reference/functions/ai_extract)
+- [CORTEX_USER ロールの付与](https://docs.snowflake.com/ja/user-guide/snowflake-cortex/aisql)
 
 ## 学習チェックリスト
 
-- [ ] `SNOWFLAKE.CORTEX.COMPLETE()` でテキスト生成ができた
-- [ ] `SENTIMENT()` でレビューのセンチメント分析ができた
-- [ ] `TRANSLATE()` でテキスト翻訳ができた
+- [ ] `AI_COMPLETE()` でテキスト生成・要約ができた
+- [ ] `AI_CLASSIFY()` で感情分類（ポジティブ／ネガティブ）ができた
+- [ ] `AI_EXTRACT()` で構造化情報の抽出ができた
 - [ ] Cortex 関数がウェアハウス上で実行される仕組みを理解した

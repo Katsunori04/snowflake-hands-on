@@ -164,3 +164,11 @@ show schemas in database LEARN_DB;
 | `Insufficient privileges` | `CREATE WAREHOUSE` や `CREATE DATABASE` を実行できるロールではない | 先頭で `USE ROLE SYSADMIN;` を実行し、必要なら管理者に権限付与を依頼する |
 
 次の章では、この 3 層アーキテクチャを使ってデータモデリングの基本を学びます。
+
+## 学習チェックリスト
+
+- [ ] Snowflake トライアルアカウントを作成できた
+- [ ] Web UI（Snowsight）にログインできた
+- [ ] ウェアハウス・データベース・スキーマを作成できた
+- [ ] 基本的な SQL（SELECT）をワークシートで実行できた
+- [ ] ロールを切り替えてアクセス制御を確認できた

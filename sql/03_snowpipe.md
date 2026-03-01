@@ -268,6 +268,13 @@ ORDER BY src_filename;
 
 ## 参考リンク
 
-- [Internal Stage の概要](https://docs.snowflake.com/en/user-guide/data-load-local-file-system-create-stage)
-- [COPY INTO（テーブルへ）](https://docs.snowflake.com/en/sql-reference/sql/copy-into-table)
-- [Snowpipe の概要](https://docs.snowflake.com/en/user-guide/data-load-snowpipe-intro)
+- [Internal Stage の概要](https://docs.snowflake.com/ja/user-guide/data-load-local-file-system-create-stage)
+- [COPY INTO（テーブルへ）](https://docs.snowflake.com/ja/sql-reference/sql/copy-into-table)
+- [Snowpipe の概要](https://docs.snowflake.com/ja/user-guide/data-load-snowpipe-intro)
+
+## 学習チェックリスト
+
+- [ ] ステージ（Stage）を作成してファイルをアップロードできた
+- [ ] COPY INTO でファイルからテーブルにデータをロードできた
+- [ ] Snowpipe を作成して自動取り込みの仕組みを理解した
+- [ ] `PIPE_STATUS` と `COPY_HISTORY` でロード状況を確認できた
