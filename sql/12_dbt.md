@@ -207,7 +207,7 @@ All checks passed!
 | エラー | 原因 | 対処法 |
 |--------|------|--------|
 | `Could not connect to Snowflake` | 認証情報の誤り・ネットワーク問題 | `profiles.yml` の account / user / password を確認 |
-| `Database 'XXX' does not exist` | データベース名の誤り | `profiles.yml` の database を `ANALYTICS` に修正 |
+| `Database 'XXX' does not exist` | データベース名の誤り | `profiles.yml` の database を `LEARN_DB` に修正 |
 | `Insufficient privileges` | スキーマ/ウェアハウスの権限不足 | Snowflake で `GRANT USAGE ON SCHEMA` を実行 |
 
 ---
@@ -235,7 +235,7 @@ dbt docs serve
 
 ## 手動 SQL との比較
 
-| 機能 | 手動 SQL（01〜07章） | dbt |
+| 機能 | 手動 SQL（01〜11章） | dbt |
 |---|---|---|
 | **再現性** | SQL ファイルを順に実行 | `dbt run` 1 コマンドで全モデルを順に実行 |
 | **依存関係管理** | 手動で実行順を管理 | `ref()` で自動解析・正しい順で実行 |

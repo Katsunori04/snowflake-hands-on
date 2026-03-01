@@ -176,7 +176,7 @@ DATABASE  = "LEARN_DB"
 SCHEMA    = "MART"
 WAREHOUSE = "LEARN_WH"
 
-# --- JWT トークンを取得 ---
+# --- セッショントークンを取得 ---
 conn = snowflake.connector.connect(
     account   = ACCOUNT,
     user      = USER,
