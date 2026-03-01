@@ -111,9 +111,10 @@ select system$pipe_status('RAW.EVENTS_PIPE');
 --   - イベント数 : 800件（ファイル取り込みの 200件と合わせて ~1000件）
 --   - ユーザー   : u001〜u030 からランダム
 --   - 期間       : 2025-12-01〜2026-02-28（3ヶ月）
---   - 商品       : 15 SKU から順に割り当て（カテゴリ均等）
+--   - 商品       : SKU0001〜SKU0100 からランダム（100種）
 --   - デバイス   : iOS / Android / PC のいずれか
 --   - 数量       : 1〜3 のランダム
+--   - 価格       : 100〜9999 のランダム
 -- ============================================================
 INSERT INTO RAW.RAW_EVENTS_PIPE (raw, src_filename, loaded_at)
 SELECT
@@ -121,44 +122,11 @@ SELECT
     '{"event_id":"gen_' || seq4()::STRING || '",'
     || '"user_id":"u' || LPAD(UNIFORM(1, 30, RANDOM())::STRING, 3, '0') || '",'
     || '"event_type":"purchase",'
-    -- 2025-12-01 から最大 7776000 秒（= 90日）のランダムオフセット
-    || '"event_time":"' || DATEADD(
-        second,
-        UNIFORM(0, 7776000, RANDOM()),
-        '2025-12-01'::TIMESTAMP_NTZ
-       )::STRING || 'Z",'
-    || '"device":{"os":"' || CASE MOD(seq4(), 3) WHEN 0 THEN 'iOS' WHEN 1 THEN 'Android' ELSE 'PC' END
-       || '","app_version":"2.0.0"},'
-    || '"items":[{"sku":"' || CASE MOD(seq4(), 15)
-          WHEN  0 THEN 'A001' WHEN  1 THEN 'A002' WHEN  2 THEN 'A003'
-          WHEN  3 THEN 'B001' WHEN  4 THEN 'B002' WHEN  5 THEN 'B003'
-          WHEN  6 THEN 'C001' WHEN  7 THEN 'C002' WHEN  8 THEN 'C003'
-          WHEN  9 THEN 'D001' WHEN 10 THEN 'D002' WHEN 11 THEN 'D003'
-          WHEN 12 THEN 'E001' WHEN 13 THEN 'E002' ELSE         'E003'
-        END || '",'
-    || '"product_name":"' || CASE MOD(seq4(), 15)
-          WHEN  0 THEN 'Trail Shoes'       WHEN  1 THEN 'Yoga Mat'           WHEN  2 THEN 'Running Cap'
-          WHEN  3 THEN 'Coffee Beans'      WHEN  4 THEN 'Protein Bar'        WHEN  5 THEN 'Green Tea'
-          WHEN  6 THEN 'Desk Lamp'         WHEN  7 THEN 'Candle Set'         WHEN  8 THEN 'Air Purifier'
-          WHEN  9 THEN 'USB Hub'           WHEN 10 THEN 'Webcam'             WHEN 11 THEN 'Bluetooth Speaker'
-          WHEN 12 THEN 'Cotton Tote'       WHEN 13 THEN 'Wool Scarf'         ELSE        'Leather Wallet'
-        END || '",'
-    || '"category":"' || CASE MOD(seq4(), 15)
-          WHEN  0 THEN 'Sports'      WHEN  1 THEN 'Sports'      WHEN  2 THEN 'Sports'
-          WHEN  3 THEN 'Food'        WHEN  4 THEN 'Food'        WHEN  5 THEN 'Food'
-          WHEN  6 THEN 'Home'        WHEN  7 THEN 'Home'        WHEN  8 THEN 'Home'
-          WHEN  9 THEN 'Electronics' WHEN 10 THEN 'Electronics' WHEN 11 THEN 'Electronics'
-          WHEN 12 THEN 'Fashion'     WHEN 13 THEN 'Fashion'     ELSE        'Fashion'
-        END || '",'
-    || '"qty":' || UNIFORM(1, 3, RANDOM())::STRING || ','
-    || '"price":' || CASE MOD(seq4(), 15)
-          WHEN  0 THEN '12000' WHEN  1 THEN '4800'  WHEN  2 THEN '2500'
-          WHEN  3 THEN '900'   WHEN  4 THEN '350'   WHEN  5 THEN '600'
-          WHEN  6 THEN '4500'  WHEN  7 THEN '2800'  WHEN  8 THEN '18000'
-          WHEN  9 THEN '3200'  WHEN 10 THEN '8500'  WHEN 11 THEN '12000'
-          WHEN 12 THEN '1500'  WHEN 13 THEN '3600'  ELSE        '6800'
-        END
-    || '}]}'
+    || '"event_time":"' || DATEADD(second, UNIFORM(0, 7776000, RANDOM()),
+         '2025-12-01'::TIMESTAMP_NTZ)::STRING || 'Z",'
+    || '"device":{"os":"' || CASE MOD(seq4(),3)
+         WHEN 0 THEN 'iOS' WHEN 1 THEN 'Android' ELSE 'PC' END || '","app_version":"2.0.0"},'
+    || '"items":[{"sku":"SKU' || LPAD(UNIFORM(1,100,RANDOM())::STRING,4,'0') || '", "product_name":"Product_' || UNIFORM(1,50,RANDOM())::STRING || '", "category":"Category_' || UNIFORM(1,10,RANDOM())::STRING || '", "qty":' || UNIFORM(1,3,RANDOM())::STRING || ', "price":' || UNIFORM(100,9999,RANDOM())::STRING || '}]}'
   ),
   'generated',
   CURRENT_TIMESTAMP()
