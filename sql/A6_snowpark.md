@@ -131,13 +131,29 @@ Notebooks では追加のインストール不要で Snowpark が使えます。
 
 ```python
 # Notebooks ではセッションが事前に用意されている
-# from snowflake.snowpark.context import get_active_session
-# session = get_active_session()
+from snowflake.snowpark.context import get_active_session
+session = get_active_session()
 
 # あとは通常の Snowpark コードと同じ
 df = session.table("MART.FACT_PURCHASE_EVENTS")
 df.show(5)
 ```
+
+#### 実行環境の比較
+
+```mermaid
+flowchart LR
+    A["ローカル Python 環境"] -->|"Session.builder.configs()"| B[Snowflake]
+    C["Snowsight Notebooks"] -->|"get_active_session()"| B
+    B --> D["データ処理\n（Warehouse 上で実行）"]
+    style C fill:#4a9eff,color:#fff
+```
+
+| 項目 | ローカル環境 | Snowsight Notebooks |
+|------|-------------|---------------------|
+| セットアップ | Python 環境構築 + ライブラリインストール | ブラウザのみ |
+| 接続設定 | `Session.builder.configs()` で認証情報を記述 | `get_active_session()` で自動取得 |
+| 向いている場面 | CI/CD・バッチ処理・ローカルデバッグ | 探索的分析・プロトタイプ・共有 |
 
 ---
 
@@ -186,6 +202,36 @@ session.sproc.register(
 - **Snowpark ML**: Snowflake 内で機械学習モデルを学習・デプロイする機能
 - **Notebooks**: Snowsight の組み込み Jupyter 環境（Snowpark が標準で使える）
 - **Streamlit in Snowflake**: Snowpark と組み合わせてデータアプリを Snowflake 内でホスト
+
+---
+
+## Snowpark ML 入門
+
+Snowpark ML は、Snowflake 上で機械学習モデルの学習・推論を実行するためのフレームワーク。
+
+### Snowpark ML の位置づけ
+
+| コンポーネント | 役割 |
+|--------------|------|
+| `snowflake.ml.modeling` | scikit-learn 互換の前処理・モデル学習 API |
+| `snowflake.ml.registry` | モデルのバージョン管理・デプロイ |
+| Snowpark ML Functions | SQL から呼び出せる ML 推論関数 |
+
+### 基本的な使い方（概念）
+
+```python
+from snowflake.ml.modeling.preprocessing import StandardScaler
+from snowflake.ml.modeling.linear_model import LinearRegression
+
+# Snowpark DataFrame をそのまま使える
+scaler = StandardScaler(input_cols=["AMOUNT"], output_cols=["AMOUNT_SCALED"])
+df_scaled = scaler.fit(df).transform(df)
+
+model = LinearRegression(input_cols=["AMOUNT_SCALED"], label_cols=["TARGET"])
+model.fit(df_scaled)
+```
+
+> **補足**: Snowpark ML の詳細は [Snowflake 公式ドキュメント](https://docs.snowflake.com/en/developer-guide/snowpark-ml/index) を参照。
 
 ---
 
