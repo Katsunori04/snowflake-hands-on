@@ -261,5 +261,5 @@ VS Code は「変更を育てる力」をくれます。
 ## 参考リンク
 
 - [Visual Studio Code 公式サイト](https://code.visualstudio.com/)
-- [Snowflake SQL API の概要](https://docs.snowflake.com/en/developer-guide/sql-api/index)
+- [Snowflake SQL API の概要](https://docs.snowflake.com/ja/developer-guide/sql-api/index)
 - [GitHub Pull Requests and Issues for VS Code](https://code.visualstudio.com/docs/sourcecontrol/github)

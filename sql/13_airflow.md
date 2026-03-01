@@ -234,7 +234,7 @@ run_raw_load_sql >> run_dbt >> run_quality_check
 
 - [Apache Airflow ドキュメント](https://airflow.apache.org/docs/)
 - [Snowflake Provider for Airflow](https://airflow.apache.org/docs/apache-airflow-providers-snowflake/stable/index.html)
-- [Snowflake + Airflow 連携ガイド](https://docs.snowflake.com/en/user-guide/ecosystem-airflow)
+- [Snowflake + Airflow 連携ガイド](https://docs.snowflake.com/ja/user-guide/ecosystem-airflow)
 
 ## 学習チェックリスト
 

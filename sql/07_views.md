@@ -285,7 +285,7 @@ group by user_id, user_name, prefecture;
 
 ## 参考リンク
 
-- [Overview of views, materialized views, and dynamic tables](https://docs.snowflake.com/en/user-guide/overview-view-mview-dts)
-- [CREATE VIEW](https://docs.snowflake.com/en/sql-reference/sql/create-view)
-- [Working with Secure Views](https://docs.snowflake.com/en/user-guide/views-secure)
-- [CREATE SECURE VIEW](https://docs.snowflake.com/en/sql-reference/sql/create-view)
+- [Overview of views, materialized views, and dynamic tables](https://docs.snowflake.com/ja/user-guide/overview-view-mview-dts)
+- [CREATE VIEW](https://docs.snowflake.com/ja/sql-reference/sql/create-view)
+- [Working with Secure Views](https://docs.snowflake.com/ja/user-guide/views-secure)
+- [CREATE SECURE VIEW](https://docs.snowflake.com/ja/sql-reference/sql/create-view)
