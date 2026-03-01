@@ -148,12 +148,12 @@ SQL の中で AI が日本語要約を生成することを確認します。
 3. **JSON 処理**（02章）: VARIANT 型・LATERAL FLATTEN
 4. **ファイル取り込み**（03章）: Stage・COPY INTO・Snowpipe
 5. **差分バッチ**（04章）: Stream・MERGE・Task
-5. **処理の再利用**（05章）: Stored Procedure・Dynamic Table・Task DAG・Alerts
-6. **スタースキーマ**（06章）: DIM テーブルの作成と集計
-7. **View / Secure View**（07章）: 分析の入口を View として共通化
-8. **コスト最適化**（08章）: Warehouse 設定・STAGING テーブルの活用
-9. **AI 関数**（09章）: Cortex の AI_COMPLETE・AI_CLASSIFY・AI_EXTRACT
-10. **セマンティック・検索**（10章）: Semantic View・Cortex Analyst・Cortex Search
+6. **処理の再利用**（05章）: Stored Procedure・Dynamic Table・Task DAG・Alerts
+7. **スタースキーマ**（06章）: DIM テーブルの作成と集計
+8. **View / Secure View**（07章）: 分析の入口を View として共通化
+9. **コスト最適化**（08章）: Warehouse 設定・STAGING テーブルの活用
+10. **AI 関数**（09章）: Cortex の AI_COMPLETE・AI_CLASSIFY・AI_EXTRACT
+11. **セマンティック・検索**（10章）: Semantic View・Cortex Analyst・Cortex Search
 
 これらを組み合わせることで、JSON のイベントデータからスタースキーマの分析基盤まで、Snowflake 内で完結するパイプラインを構築できます。
 
