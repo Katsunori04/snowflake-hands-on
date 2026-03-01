@@ -12,6 +12,8 @@
 
 ## 使い方
 
+> 第11章（dbt）と第12章（Airflow）は SQL 実行章ではなく、各フォルダのサンプルコードを参照しながら進める章です。
+
 | 章 | テーマ | 教材テキスト | SQL ファイル |
 |---|---|---|---|
 | 第0章 | 環境準備 | [教材を読む](sql/00_setup.md) | [00_setup.sql](sql/00_setup.sql) |
@@ -95,6 +97,7 @@ snowflake-hands-on/
 - Snowflake の worksheet が使える
 - `CREATE DATABASE`, `CREATE WAREHOUSE`, `CREATE STAGE`, `CREATE PIPE`, `CREATE TASK` ができる権限がある
 - AI 関数を試す場合は `SNOWFLAKE.CORTEX_USER` が必要
+- Semantic View / Cortex Analyst / Cortex Search は、アカウントやリージョン、権限によって利用できない場合がある
 - Airflow と dbt はこの教材では「最小構成の読み物 + コピペ用サンプル」
 
 ## 題材
@@ -160,7 +163,7 @@ flowchart TD
     A["📁 events_sample.json\n（ローカルファイル）"] -->|"PUT コマンド"| B["@RAW.EVENT_STAGE\n（内部ステージ）（03章）"]
     B -->|"Snowpipe 自動取込"| C["RAW_EVENTS_PIPE\n（生データテーブル）（03章）"]
     D["SQL INSERT\n（手動）（02章）"] -->|"練習用"| E["RAW_EVENTS\n（02章 SQL練習用）"]
-    C -->|"Stream 変更検知"| F["STREAM\nRAW_EVENTS_PIPE_STREAM（04章）"]
+    C -->|"Stream 変更検知"| F["STREAM\nRAW_EVENTS_STREAM（04章）"]
     F -->|"Task + MERGE"| G["FACT_PURCHASE_EVENTS\n（ファクトテーブル）（04章・06章）"]
     G -->|"JOIN"| H["DIM_USERS（06章）"]
     G -->|"JOIN"| I["DIM_DATE（06章）"]
