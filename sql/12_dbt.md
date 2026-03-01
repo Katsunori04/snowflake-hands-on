@@ -114,6 +114,8 @@ select
 from {{ source('RAW', 'RAW_EVENTS_PIPE') }}
 ```
 
+このサンプルでは、04章で `FORCE = TRUE` による再取り込みを行っても `dbt test` が壊れないよう、`stg_events` 側で同じ `event_id` の重複を最新 `loaded_at` で 1 行に寄せています。
+
 **`ref()` の例**（`dbt/models/fct_purchase_events.sql`）:
 
 ```sql
@@ -186,6 +188,8 @@ models:
 ```
 
 手動で確認クエリを書かなくても、`dbt test` でこれらが自動的に検証されます。
+
+> この教材の `dim_products` は `sku` をキーにしているため、03章の generator データでも `sku -> product_name/category` が一貫するようにしてあります。
 
 ---
 

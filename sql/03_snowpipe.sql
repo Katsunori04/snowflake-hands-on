@@ -40,6 +40,12 @@ create or replace table RAW.RAW_EVENTS_PIPE (
 -- アップロード確認 SQL（ファイルが見えれば成功）:
 list @RAW.EVENT_STAGE;
 
+-- 【SnowCLI でアップロードする場合】
+-- Snowsight を使わず CLI で進める場合は、以下でも同じ stage に置ける。
+-- put file:///absolute/path/to/datasets/events_sample.json @RAW.EVENT_STAGE
+--   auto_compress=false overwrite=true;
+-- list @RAW.EVENT_STAGE;
+
 -- その後、まずは手動ロードを試します。
 --
 -- COPY INTO オプションの補足:
@@ -117,20 +123,48 @@ select system$pipe_status('RAW.EVENTS_PIPE');
 --   - 価格       : 100〜9999 のランダム
 -- ============================================================
 INSERT INTO RAW.RAW_EVENTS_PIPE (raw, src_filename, loaded_at)
+WITH generated_rows AS (
+  SELECT
+    seq4() AS seq_num,
+    UNIFORM(1, 30, RANDOM()) AS user_num,
+    UNIFORM(1, 100, RANDOM()) AS sku_num,
+    UNIFORM(1, 3, RANDOM()) AS qty_num,
+    UNIFORM(100, 9999, RANDOM()) AS price_num,
+    DATEADD(
+      second,
+      UNIFORM(0, 7776000, RANDOM()),
+      '2025-12-01'::TIMESTAMP_NTZ
+    ) AS event_time,
+    CASE MOD(seq4(), 3)
+      WHEN 0 THEN 'iOS'
+      WHEN 1 THEN 'Android'
+      ELSE 'PC'
+    END AS device_os
+  FROM TABLE(GENERATOR(ROWCOUNT => 800))
+)
 SELECT
   PARSE_JSON(
-    '{"event_id":"gen_' || seq4()::STRING || '",'
-    || '"user_id":"u' || LPAD(UNIFORM(1, 30, RANDOM())::STRING, 3, '0') || '",'
+    '{"event_id":"gen_' || seq_num::STRING || '",'
+    || '"user_id":"u' || LPAD(user_num::STRING, 3, '0') || '",'
     || '"event_type":"purchase",'
-    || '"event_time":"' || DATEADD(second, UNIFORM(0, 7776000, RANDOM()),
-         '2025-12-01'::TIMESTAMP_NTZ)::STRING || 'Z",'
-    || '"device":{"os":"' || CASE MOD(seq4(),3)
-         WHEN 0 THEN 'iOS' WHEN 1 THEN 'Android' ELSE 'PC' END || '","app_version":"2.0.0"},'
-    || '"items":[{"sku":"SKU' || LPAD(UNIFORM(1,100,RANDOM())::STRING,4,'0') || '", "product_name":"Product_' || UNIFORM(1,50,RANDOM())::STRING || '", "category":"Category_' || UNIFORM(1,10,RANDOM())::STRING || '", "qty":' || UNIFORM(1,3,RANDOM())::STRING || ', "price":' || UNIFORM(100,9999,RANDOM())::STRING || '}]}'
+    || '"event_time":"' || event_time::STRING || 'Z",'
+    || '"device":{"os":"' || device_os || '","app_version":"2.0.0"},'
+    || '"items":[{"sku":"SKU' || LPAD(sku_num::STRING, 4, '0') || '",'
+    || '"product_name":"Product_' || LPAD(sku_num::STRING, 4, '0') || '",'
+    || '"category":"'
+    || CASE MOD(sku_num - 1, 5)
+         WHEN 0 THEN 'Sports'
+         WHEN 1 THEN 'Food'
+         WHEN 2 THEN 'Home'
+         WHEN 3 THEN 'Electronics'
+         ELSE 'Fashion'
+       END
+    || '", "qty":' || qty_num::STRING
+    || ', "price":' || price_num::STRING || '}]}'
   ),
   'generated',
   CURRENT_TIMESTAMP()
-FROM TABLE(GENERATOR(ROWCOUNT => 800));
+FROM generated_rows;
 
 -- 生成後の件数確認
 SELECT

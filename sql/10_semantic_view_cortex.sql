@@ -167,15 +167,16 @@ SELECT
   ) AS raw_results;
 
 -- Check: 結果を LATERAL FLATTEN で行に展開して読みやすくする
+-- SEARCH_PREVIEW は JSON 文字列として返るため、FLATTEN 前に parse_json する
 SELECT
   r.value:review_id::STRING   AS review_id,
   r.value:user_id::STRING     AS user_id,
   r.value:review_text::STRING AS review_text
 FROM (
-  SELECT SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
+  SELECT PARSE_JSON(SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
     'STAGING.REVIEW_SEARCH',
     '{"query": "comfortable shoes", "columns": ["review_id","user_id","review_text"], "limit": 3}'
-  ) AS raw
+  )) AS raw
 ),
 LATERAL FLATTEN(INPUT => raw:results) r;
 

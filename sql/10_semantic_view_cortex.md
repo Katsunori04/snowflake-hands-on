@@ -280,7 +280,7 @@ SELECT
   ) AS search_results;
 ```
 
-レスポンスは JSON 形式です。フラット化して見やすくするには:
+レスポンスは JSON 文字列として返るため、`parse_json(...)` してからフラット化します。
 
 ```sql
 SELECT
@@ -288,10 +288,10 @@ SELECT
   r.value:user_id::STRING      AS user_id,
   r.value:review_text::STRING  AS review_text
 FROM (
-  SELECT SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
+  SELECT parse_json(SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
     'STAGING.REVIEW_SEARCH',
     '{"query": "comfortable shoes", "columns": ["review_id","user_id","review_text"], "limit": 3}'
-  ) AS raw
+  )) AS raw
 ),
 LATERAL FLATTEN(INPUT => raw:results) r;
 ```
