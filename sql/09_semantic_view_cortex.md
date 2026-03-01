@@ -376,3 +376,10 @@ SELECT SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
 - [Cortex Search の概要](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-search/cortex-search-overview)
 - [CREATE CORTEX SEARCH SERVICE](https://docs.snowflake.com/en/sql-reference/sql/create-cortex-search)
 - [SEARCH_PREVIEW 関数](https://docs.snowflake.com/en/sql-reference/functions/search_preview-snowflake-cortex)
+
+## 学習チェックリスト
+
+- [ ] Semantic View を作成して METRICS / DIMENSIONS を定義できた
+- [ ] Cortex Analyst に自然言語でクエリを投げられた
+- [ ] Cortex Search サービスを作成してハイブリッド検索ができた
+- [ ] 3機能（Semantic View / Analyst / Search）の使い分けを説明できる
