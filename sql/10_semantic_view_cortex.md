@@ -24,9 +24,9 @@
 
 ```mermaid
 flowchart LR
-    A["FACT_PURCHASE_EVENTS\n+ DIM_*（06章）"] -->|意味定義| B["Semantic View\nMETRICS / DIMENSIONS"]
-    B -->|SQL変換の基盤| C["Cortex Analyst\n自然言語→SQL"]
-    D["STAGING.REVIEWS\n（09章）"] -->|インデックス化| E["Cortex Search\nハイブリッド検索"]
+    A["FACT_PURCHASE_EVENTS<br/>+ DIM_*（06章）"] -->|意味定義| B["Semantic View<br/>METRICS / DIMENSIONS"]
+    B -->|SQL変換の基盤| C["Cortex Analyst<br/>自然言語→SQL"]
+    D["STAGING.REVIEWS<br/>（09章）"] -->|インデックス化| E["Cortex Search<br/>ハイブリッド検索"]
 ```
 
 ---

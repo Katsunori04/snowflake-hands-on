@@ -171,16 +171,16 @@ snowflake-hands-on/
 
 ```mermaid
 flowchart TD
-    A["📁 events_sample.json\n（ローカルファイル）"] -->|"PUT コマンド"| B["@RAW.EVENT_STAGE\n（内部ステージ）（03章）"]
-    B -->|"Snowpipe 自動取込"| C["RAW_EVENTS_PIPE\n（生データテーブル）（03章）"]
-    D["SQL INSERT\n（手動）（02章）"] -->|"練習用"| E["RAW_EVENTS\n（02章 SQL練習用）"]
-    C -->|"Stream 変更検知"| F["STREAM\nRAW_EVENTS_STREAM（04章）"]
-    F -->|"Task + MERGE"| G["FACT_PURCHASE_EVENTS\n（ファクトテーブル）（04章・06章）"]
+    A["📁 events_sample.json<br/>（ローカルファイル）"] -->|"PUT コマンド"| B["@RAW.EVENT_STAGE<br/>（内部ステージ）（03章）"]
+    B -->|"Snowpipe 自動取込"| C["RAW_EVENTS_PIPE<br/>（生データテーブル）（03章）"]
+    D["SQL INSERT<br/>（手動）（02章）"] -->|"練習用"| E["RAW_EVENTS<br/>（02章 SQL練習用）"]
+    C -->|"Stream 変更検知"| F["STREAM<br/>RAW_EVENTS_STREAM（04章）"]
+    F -->|"Task + MERGE"| G["FACT_PURCHASE_EVENTS<br/>（ファクトテーブル）（04章・06章）"]
     G -->|"JOIN"| H["DIM_USERS（06章）"]
     G -->|"JOIN"| I["DIM_DATE（06章）"]
     G -->|"JOIN"| J["DIM_PRODUCTS（06章）"]
     G -->|"Cortex AI分析"| K["AI 分析結果（09章・10章）"]
-    G -->|"Semantic View"| L["Semantic View\n（Cortex Analyst）（10章）"]
+    G -->|"Semantic View"| L["Semantic View<br/>（Cortex Analyst）（10章）"]
 ```
 
 ## 用語早見表

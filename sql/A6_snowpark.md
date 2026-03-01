@@ -145,7 +145,7 @@ df.show(5)
 flowchart LR
     A["ローカル Python 環境"] -->|"Session.builder.configs()"| B[Snowflake]
     C["Snowsight Notebooks"] -->|"get_active_session()"| B
-    B --> D["データ処理\n（Warehouse 上で実行）"]
+    B --> D["データ処理<br/>（Warehouse 上で実行）"]
     style C fill:#4a9eff,color:#fff
 ```
 

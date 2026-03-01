@@ -21,11 +21,11 @@
 
 ```mermaid
 flowchart TD
-    F[events_sample.json] -->|Snowsight でアップロード| STG["@RAW.EVENT_STAGE\nファイルの置き場所"]
-    STG -->|COPY INTO 手動 / Snowpipe 自動| PIPE["RAW.RAW_EVENTS_PIPE\nファイルから取り込んだ生データ"]
-    PIPE -->|変更差分を記録| STREAM["RAW.RAW_EVENTS_STREAM\nまだ FACT に反映されていない行"]
-    STREAM -->|Task が定期起動| MERGE["MERGE 処理\n（LATERAL FLATTEN で配列を展開）"]
-    MERGE -->|INSERT / UPDATE| FACT["MART.FACT_PURCHASE_EVENTS\n分析に使う FACT テーブル"]
+    F[events_sample.json] -->|Snowsight でアップロード| STG["@RAW.EVENT_STAGE<br/>ファイルの置き場所"]
+    STG -->|COPY INTO 手動 / Snowpipe 自動| PIPE["RAW.RAW_EVENTS_PIPE<br/>ファイルから取り込んだ生データ"]
+    PIPE -->|変更差分を記録| STREAM["RAW.RAW_EVENTS_STREAM<br/>まだ FACT に反映されていない行"]
+    STREAM -->|Task が定期起動| MERGE["MERGE 処理<br/>（LATERAL FLATTEN で配列を展開）"]
+    MERGE -->|INSERT / UPDATE| FACT["MART.FACT_PURCHASE_EVENTS<br/>分析に使う FACT テーブル"]
 
     subgraph 03章の範囲
         F

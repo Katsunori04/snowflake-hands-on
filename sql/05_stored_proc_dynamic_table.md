@@ -22,18 +22,18 @@
 flowchart LR
     subgraph 04章["04章: Task に直書き"]
         direction TB
-        T1["Task\n(CRON スケジュール)"] -->|"AS 節に長い MERGE 文"| F1["FACT_PURCHASE_EVENTS"]
+        T1["Task<br/>(CRON スケジュール)"] -->|"AS 節に長い MERGE 文"| F1["FACT_PURCHASE_EVENTS"]
     end
 
     subgraph 05章SP["05章: Stored Procedure + Task"]
         direction TB
-        T2["Task\n(CRON スケジュール)"] -->|"CALL"| SP["SP_MERGE_PURCHASE_EVENTS\n(MERGE をカプセル化)"]
+        T2["Task<br/>(CRON スケジュール)"] -->|"CALL"| SP["SP_MERGE_PURCHASE_EVENTS<br/>(MERGE をカプセル化)"]
         SP -->|MERGE| F2["FACT_PURCHASE_EVENTS"]
     end
 
     subgraph 05章DT["05章: Dynamic Table（宣言的）"]
         direction TB
-        SRC["RAW_EVENTS_PIPE"] -->|"LAG=1分で自動リフレッシュ\n（Task 不要）"| DT["DYN_STG_EVENTS\n（Dynamic Table）"]
+        SRC["RAW_EVENTS_PIPE"] -->|"LAG=1分で自動リフレッシュ<br/>（Task 不要）"| DT["DYN_STG_EVENTS<br/>（Dynamic Table）"]
     end
 ```
 
@@ -43,8 +43,8 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    ROOT["RAW.TASK_LOAD_PIPE\n（ルート: CRON 0/5 分ごと）\nALTER PIPE RAW.EVENTS_PIPE REFRESH"]
-    -->|"完了後に自動起動"| CHILD["RAW.TASK_MERGE_FACT\n（子: スケジュールなし）\nCALL MART.SP_MERGE_PURCHASE_EVENTS()"]
+    ROOT["RAW.TASK_LOAD_PIPE<br/>（ルート: CRON 0/5 分ごと）<br/>ALTER PIPE RAW.EVENTS_PIPE REFRESH"]
+    -->|"完了後に自動起動"| CHILD["RAW.TASK_MERGE_FACT<br/>（子: スケジュールなし）<br/>CALL MART.SP_MERGE_PURCHASE_EVENTS()"]
 ```
 
 > **起動順序の注意**: Task を resume するときは **子 Task を先に resume し、ルート Task を後で resume** する。

@@ -62,9 +62,9 @@ VS Code は **育てる場所** として優秀です。
 
 ```mermaid
 flowchart LR
-    A["VS Code\nSQL / Markdown / Python を編集"]
-    B["Git\n差分確認・commit・PR"]
-    C["Snowflake\nSnowsight / 接続先"]
+    A["VS Code<br/>SQL / Markdown / Python を編集"]
+    B["Git<br/>差分確認・commit・PR"]
+    C["Snowflake<br/>Snowsight / 接続先"]
 
     A --> B
     A --> C
