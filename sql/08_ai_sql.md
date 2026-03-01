@@ -229,3 +229,10 @@ from STAGING.REVIEWS;
 - [AI_CLASSIFY（CLASSIFY_TEXT 関数）](https://docs.snowflake.com/en/sql-reference/functions/classify-text-snowflake-cortex)
 - [AI_EXTRACT（EXTRACT_ANSWER 関数）](https://docs.snowflake.com/en/sql-reference/functions/extract-answer-snowflake-cortex)
 - [CORTEX_USER ロールの付与](https://docs.snowflake.com/en/user-guide/snowflake-cortex/llm-functions#required-privileges)
+
+## 学習チェックリスト
+
+- [ ] `SNOWFLAKE.CORTEX.COMPLETE()` でテキスト生成ができた
+- [ ] `SENTIMENT()` でレビューのセンチメント分析ができた
+- [ ] `TRANSLATE()` でテキスト翻訳ができた
+- [ ] Cortex 関数がウェアハウス上で実行される仕組みを理解した

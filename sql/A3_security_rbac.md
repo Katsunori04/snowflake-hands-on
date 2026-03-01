@@ -38,6 +38,29 @@ ACCOUNTADMIN（最上位）
 └── PUBLIC
 ```
 
+```mermaid
+graph TD
+  ACCOUNTADMIN --> SYSADMIN
+  ACCOUNTADMIN --> SECURITYADMIN
+  SYSADMIN --> DATA_ENGINEER_ROLE["DATA_ENGINEER_ROLE（カスタム）"]
+  SYSADMIN --> ANALYST_ROLE["ANALYST_ROLE（カスタム）"]
+  SECURITYADMIN --> USERADMIN
+```
+
+#### なぜカスタムロールを SYSADMIN 配下に置くか
+
+- **権限継承**: SYSADMIN はデータベース・ウェアハウスの所有権を持つ。配下のカスタムロールは SYSADMIN を通じてそれらを操作できる
+- **最小権限の原則**: ACCOUNTADMIN は請求・アカウント設定など強力な権限を持つため、日常業務では使わない
+- **SECURITYADMIN 配下は NG**: SECURITYADMIN はユーザー管理専用。データ操作権限とは分離する
+
+#### ロール設計例
+
+| ロール | 用途 | 付与する権限 |
+|--------|------|-------------|
+| `ANALYST_ROLE` | レポート・ダッシュボード作成者 | SELECT on ANALYTICS schema |
+| `DEVELOPER_ROLE` | アプリ開発者 | SELECT / INSERT on RAW / STAGING |
+| `DATA_ENGINEER_ROLE` | パイプライン構築・管理 | USAGE on Warehouse + CREATE TABLE 等 |
+
 > **試験頻出**: カスタムロールは必ず **SYSADMIN 以上に GRANT** する。しないと ACCOUNTADMIN でもオブジェクトが見えないことがある。
 
 ---

@@ -235,3 +235,10 @@ run_raw_load_sql >> run_dbt >> run_quality_check
 - [Apache Airflow ドキュメント](https://airflow.apache.org/docs/)
 - [Snowflake Provider for Airflow](https://airflow.apache.org/docs/apache-airflow-providers-snowflake/stable/index.html)
 - [Snowflake + Airflow 連携ガイド](https://docs.snowflake.com/en/user-guide/ecosystem-airflow)
+
+## 学習チェックリスト
+
+- [ ] Airflow の DAG・Task・Operator の概念を説明できる
+- [ ] SnowflakeOperator を使った SQL 実行タスクを理解した
+- [ ] DAG の依存関係（`>>` 演算子）を設定できる
+- [ ] Airflow と Snowflake Task の使い分けを判断できる
