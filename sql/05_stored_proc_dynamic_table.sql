@@ -35,6 +35,7 @@ CREATE OR REPLACE PROCEDURE MART.SP_MERGE_PURCHASE_EVENTS()
   RETURNS STRING
   LANGUAGE SQL
 AS $$
+BEGIN
   -- 04章の手動 MERGE と同一の処理。内容は変えず「名前をつけて呼び出せる」ようにした。
   MERGE INTO MART.FACT_PURCHASE_EVENTS tgt
   USING (
@@ -73,6 +74,7 @@ AS $$
     src.line_amount, src.src_filename
   );
   RETURN '完了';
+END;
 $$;
 
 -- プロシージャを手動実行して動作確認
