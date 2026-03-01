@@ -350,3 +350,10 @@ alter task STAGING.LOAD_FACT_PURCHASE_EVENTS resume;
 - [MERGE 文](https://docs.snowflake.com/en/sql-reference/sql/merge)
 - [Task の概要](https://docs.snowflake.com/en/user-guide/tasks-intro)
 - [TASK_HISTORY 関数](https://docs.snowflake.com/en/sql-reference/functions/task_history)
+
+## 学習チェックリスト
+
+- [ ] Stream を作成して変更データをキャプチャできた
+- [ ] `SYSTEM$STREAM_HAS_DATA()` でデータ有無を確認できた
+- [ ] Task を作成してスケジュール実行を設定できた
+- [ ] Stream + Task による増分バッチ処理の仕組みを説明できる

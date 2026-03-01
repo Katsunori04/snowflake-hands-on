@@ -254,3 +254,10 @@ DIM_PRODUCTS ── FACT_PURCHASE_EVENTS ── DIM_DATE
 
 - [テーブル設計の考え方](https://docs.snowflake.com/en/user-guide/table-considerations)
 - [CREATE TABLE](https://docs.snowflake.com/en/sql-reference/sql/create-table)
+
+## 学習チェックリスト
+
+- [ ] スタースキーマのテーブル構造（ファクト + ディメンション）を設計できた
+- [ ] ファクトテーブルとディメンションテーブルを JOIN できた
+- [ ] 集計クエリ（売上合計・カテゴリ別集計）を書けた
+- [ ] スタースキーマがなぜクエリパフォーマンスに有利かを説明できる

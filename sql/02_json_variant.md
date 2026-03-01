@@ -304,3 +304,10 @@ order by total_amount desc;
 - [VARIANT 型の概要](https://docs.snowflake.com/en/user-guide/semistructured-intro)
 - [半構造化データのクエリ](https://docs.snowflake.com/en/user-guide/querying-semistructured)
 - [FLATTEN 関数](https://docs.snowflake.com/en/sql-reference/functions/flatten)
+
+## 学習チェックリスト
+
+- [ ] VARIANT 型にデータを挿入できた
+- [ ] コロン記法（`::`）と `GET()` でネストされた値を取り出せた
+- [ ] `FLATTEN()` で配列を展開できた
+- [ ] JSON データのフィルタリングと集計ができた
