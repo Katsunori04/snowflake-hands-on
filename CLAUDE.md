@@ -50,6 +50,21 @@ DIM_USERS / DIM_PRODUCTS / DIM_DATE（06章）
 
 ## 開発コマンド
 
+### SnowCLI
+
+Snowflake の CLI ツール（`snow`）を使用してよい。Issue 調査・動作確認・オブジェクト操作に活用する。
+
+```bash
+# 接続確認
+snow connection test
+
+# SQL 実行（Snowsight を開かずにクエリ確認）
+snow sql -q "SELECT COUNT(*) FROM RAW.RAW_EVENTS_PIPE"
+
+# オブジェクト一覧確認
+snow object list table --database HANDS_ON_DB --schema RAW
+```
+
 ### dbt（12章）
 
 ```bash
