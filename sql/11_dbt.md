@@ -263,3 +263,10 @@ dbt docs serve
 - [dbt ドキュメント](https://docs.getdbt.com/)
 - [dbt Snowflake アダプタ](https://docs.getdbt.com/docs/core/connect-data-platform/snowflake-setup)
 - [Snowflake + dbt 連携ガイド](https://docs.snowflake.com/en/user-guide/ecosystem-dbt)
+
+## 学習チェックリスト
+
+- [ ] dbt の役割（SQL 変換層のバージョン管理・テスト）を説明できる
+- [ ] `dbt run` / `dbt test` の基本コマンドを理解した
+- [ ] ref() 関数でモデル間の依存関係を定義できる
+- [ ] Snowflake と dbt の接続設定（profiles.yml）を理解した

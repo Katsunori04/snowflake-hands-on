@@ -22,22 +22,11 @@
 
 ### この章の 3 機能の位置づけ
 
-```
-【データ】
-  FACT_PURCHASE_EVENTS + DIM_*（06章）
-  STAGING.REVIEWS（08章）
-        │
-        ├─────────────────────────────────────┐
-        │                                     │
-        ▼                                     ▼
-【Semantic View】                    【Cortex Search】
- ビジネス概念を SQL で定義する          テキストを全文+ベクトルで
- （メトリクス・ディメンション）          インデックス化して検索する
-        │
-        ▼
-【Cortex Analyst】
- Semantic View を読んで
- 自然言語の質問を SQL に変換する
+```mermaid
+flowchart LR
+    A["FACT_PURCHASE_EVENTS\n+ DIM_*（06章）"] -->|意味定義| B["Semantic View\nMETRICS / DIMENSIONS"]
+    B -->|SQL変換の基盤| C["Cortex Analyst\n自然言語→SQL"]
+    D["STAGING.REVIEWS\n（08章）"] -->|インデックス化| E["Cortex Search\nハイブリッド検索"]
 ```
 
 ---
@@ -344,12 +333,12 @@ SELECT SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
 
 ## Try This
 
-1. **Semantic View にメトリクスを追加してみる**
+1. **（ステップ1 必須）Semantic View にメトリクスを追加してみる**
 
    `SUM(fact.qty)` を「総購入数量」として `fact.total_qty` に定義したあと、
    Cortex Analyst に「SKU 別の総購入数量を教えてください」と質問してみましょう。
 
-2. **Cortex Search の検索クエリを変えてみる**
+2. **（ステップ2 発展）Cortex Search の検索クエリを変えてみる**
 
    `"query": "coffee aroma"` を `"query": "setup instructions confusing"` に変えて、
    ベクトル検索が意味的に近いレビューを見つけることを確認してみましょう。
@@ -376,3 +365,10 @@ SELECT SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
 - [Cortex Search の概要](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-search/cortex-search-overview)
 - [CREATE CORTEX SEARCH SERVICE](https://docs.snowflake.com/en/sql-reference/sql/create-cortex-search)
 - [SEARCH_PREVIEW 関数](https://docs.snowflake.com/en/sql-reference/functions/search_preview-snowflake-cortex)
+
+## 学習チェックリスト
+
+- [ ] Semantic View を作成して METRICS / DIMENSIONS を定義できた
+- [ ] Cortex Analyst に自然言語でクエリを投げられた
+- [ ] Cortex Search サービスを作成してハイブリッド検索ができた
+- [ ] 3機能（Semantic View / Analyst / Search）の使い分けを説明できる
