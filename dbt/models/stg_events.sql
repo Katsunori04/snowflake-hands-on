@@ -9,3 +9,7 @@ select
   src_filename,
   loaded_at
 from {{ source('RAW', 'RAW_EVENTS_PIPE') }}
+qualify row_number() over (
+  partition by raw:event_id::string
+  order by loaded_at desc, src_filename desc
+) = 1
