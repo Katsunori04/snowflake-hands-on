@@ -5,7 +5,7 @@
 --
 -- Prerequisite:
 --   06_star_schema.sql が完了していること（MART.FACT_PURCHASE_EVENTS, DIM_USERS, DIM_PRODUCTS）
---   08_ai_sql.sql が完了していること（STAGING.REVIEWS）
+--   09_ai_sql.sql が完了していること（STAGING.REVIEWS）
 --   grant database role SNOWFLAKE.CORTEX_USER to role <your_role>;
 
 use warehouse LEARN_WH;

@@ -1,6 +1,6 @@
-# 第9章: セマンティックビュー・Cortex Analyst・Cortex Search
+# 第10章: セマンティックビュー・Cortex Analyst・Cortex Search
 
-> この章で実行するファイル: `sql/09_semantic_view_cortex.sql`
+> この章で実行するファイル: `sql/10_semantic_view_cortex.sql`
 
 ## この章で学ぶこと
 
@@ -12,7 +12,7 @@
 
 - 第6章（`sql/06_star_schema.sql`）が完了していること
   （`MART.FACT_PURCHASE_EVENTS`、`MART.DIM_USERS`、`MART.DIM_PRODUCTS` が存在すること）
-- 第8章（`sql/08_ai_sql.sql`）が完了していること
+- 第9章（`sql/09_ai_sql.sql`）が完了していること
   （`STAGING.REVIEWS` が存在すること）
 - `SNOWFLAKE.CORTEX_USER` データベースロールが付与されていること
 
@@ -26,7 +26,7 @@
 flowchart LR
     A["FACT_PURCHASE_EVENTS\n+ DIM_*（06章）"] -->|意味定義| B["Semantic View\nMETRICS / DIMENSIONS"]
     B -->|SQL変換の基盤| C["Cortex Analyst\n自然言語→SQL"]
-    D["STAGING.REVIEWS\n（08章）"] -->|インデックス化| E["Cortex Search\nハイブリッド検索"]
+    D["STAGING.REVIEWS\n（09章）"] -->|インデックス化| E["Cortex Search\nハイブリッド検索"]
 ```
 
 ---
@@ -176,7 +176,7 @@ DATABASE  = "LEARN_DB"
 SCHEMA    = "MART"
 WAREHOUSE = "LEARN_WH"
 
-# --- JWT トークンを取得 ---
+# --- セッショントークンを取得 ---
 conn = snowflake.connector.connect(
     account   = ACCOUNT,
     user      = USER,
@@ -353,7 +353,7 @@ SELECT SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
 | Cortex Analyst | Semantic View を使って自然言語 → SQL を自動生成 | REST API / Snowsight UI |
 | Cortex Search | テキストを全文+ベクトルでハイブリッド検索 | SQL（SEARCH_PREVIEW）/ REST API |
 
-次の章では、01〜09章で構築したパイプライン全体を俯瞰して確認します。
+次の章では、01〜10章で構築したパイプライン全体を俯瞰して確認します。
 
 ## 参考リンク
 
