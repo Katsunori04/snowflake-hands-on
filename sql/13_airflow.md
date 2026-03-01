@@ -1,4 +1,4 @@
-# 第12章: Airflow 入門
+# 第13章: Airflow 入門
 
 > 参照ファイル: `airflow/snowflake_event_pipeline.py`
 

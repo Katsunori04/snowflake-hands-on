@@ -1,6 +1,6 @@
-# 第6.5章: 分析の入口を作る（View / Secure View）
+# 第7章: 分析の入口を作る（View / Secure View）
 
-> この章で実行するファイル: `sql/06_5_views.sql`
+> この章で実行するファイル: `sql/07_views.sql`
 
 ## この章で学ぶこと
 

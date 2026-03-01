@@ -1,6 +1,6 @@
-# 第9章: セマンティックビュー・Cortex Analyst・Cortex Search
+# 第10章: セマンティックビュー・Cortex Analyst・Cortex Search
 
-> この章で実行するファイル: `sql/09_semantic_view_cortex.sql`
+> この章で実行するファイル: `sql/10_semantic_view_cortex.sql`
 
 ## この章で学ぶこと
 
@@ -12,7 +12,7 @@
 
 - 第6章（`sql/06_star_schema.sql`）が完了していること
   （`MART.FACT_PURCHASE_EVENTS`、`MART.DIM_USERS`、`MART.DIM_PRODUCTS` が存在すること）
-- 第8章（`sql/08_ai_sql.sql`）が完了していること
+- 第9章（`sql/09_ai_sql.sql`）が完了していること
   （`STAGING.REVIEWS` が存在すること）
 - `SNOWFLAKE.CORTEX_USER` データベースロールが付与されていること
 

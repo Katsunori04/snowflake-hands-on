@@ -1,6 +1,6 @@
-# 第8章: AI 関数（Snowflake Cortex）
+# 第9章: AI 関数（Snowflake Cortex）
 
-> この章で実行するファイル: `sql/08_ai_sql.sql`
+> この章で実行するファイル: `sql/09_ai_sql.sql`
 
 ## この章で学ぶこと
 
