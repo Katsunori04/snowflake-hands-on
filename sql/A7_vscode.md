@@ -68,7 +68,7 @@ flowchart LR
 
     A --> B
     A --> C
-    B --> A
+    B -->|"PR フィードバックを反映"| A
 ```
 
 VS Code を使うと、1 つの画面で次をまとめて扱えます。
@@ -119,7 +119,7 @@ VS Code 連携は、最初から全部そろえなくてもよいです。
 
 ### 追加すると便利なもの
 
-1. Snowflake 拡張機能
+1. [Snowflake 拡張機能](https://marketplace.visualstudio.com/items?itemName=snowflake.snowflake-vsc)（VS Code から直接 SQL を実行できる）
 2. GitHub Pull Requests 拡張
 3. dbt / Python 系の補助拡張
 
@@ -139,7 +139,17 @@ VS Code 連携は、最初から全部そろえなくてもよいです。
 
 ここで「SQL だけではなく、説明文も同じ場所にある」ことが VS Code の強みです。
 
-### Step 2: SQL を 1 行だけ直す
+### Step 2: branch を切る
+
+変更を始める前に、作業用の branch を作ります。
+
+```bash
+git checkout -b docs/update-cost-note
+```
+
+branch を切ることで、main に直接影響を与えずに変更を試せます。
+
+### Step 3: SQL を 1 行だけ直す
 
 たとえば `sql/08_cost_optimization.sql` にコメントを 1 行足します。
 
@@ -149,7 +159,15 @@ VS Code 連携は、最初から全部そろえなくてもよいです。
 
 Snowsight でもできますが、VS Code だと「今どこを変えたか」がすぐ見えます。
 
-### Step 3: Git diff を見る
+### Step 4: Markdown も一緒に直す
+
+SQL を変えたなら、教材本文も合わせて直します。
+
+たとえば `sql/08_cost_optimization.md` に注意書きを 1 行足します。
+
+この「SQL と説明文を同時に直す」作業は、VS Code だとかなり自然です。
+
+### Step 5: Git diff を見る
 
 ここが大きな違いです。
 
@@ -163,37 +181,24 @@ git diff
 - 余計な変更が混ざっていないか
 - レビュー時に何を説明すべきか
 
-が一瞬で分かります。
+が一瞬で分かります。commit する前にここで確認するのが習慣になると、作業の質が上がります。
 
-### Step 4: 小さく commit する
+### Step 6: 小さく commit して PR につなげる
 
 差分が確認できたら、変更を小さく区切って commit します。
 
 ```bash
-git checkout -b docs/update-cost-note
 git add sql/08_cost_optimization.sql sql/08_cost_optimization.md
 git commit -m "docs: clarify cost optimization note"
 ```
+
+commit までできれば、あとは GitHub に push して PR を作るだけです。
 
 この流れに慣れると、次の価値が出ます。
 
 - 変更の意図をあとから追える
 - レビュー時に説明しやすい
-- 失敗しても、どこまで直したか戻りやすい
-
-### Step 5: PR につなげる
-
-commit までできれば、あとは GitHub に push して PR を作るだけです。
-
-この教材を「読むだけ」で終わらせず、改善提案を積み上げる運用に自然につながります。
-
-### Step 6: Markdown も一緒に直す
-
-SQL を変えたなら、教材本文も合わせて直すべきことが多いです。
-
-たとえば `sql/08_cost_optimization.md` に注意書きを 1 行足します。
-
-この「SQL と説明文を同時に直す」作業は、VS Code だとかなり自然です。
+- この教材を「読むだけ」で終わらせず、改善提案を積み上げる運用に自然につながる
 
 ---
 
@@ -261,5 +266,5 @@ VS Code は「変更を育てる力」をくれます。
 ## 参考リンク
 
 - [Visual Studio Code 公式サイト](https://code.visualstudio.com/)
-- [Snowflake SQL API の概要](https://docs.snowflake.com/ja/developer-guide/sql-api/index)
+- [Snowflake Extension for VS Code（Marketplace）](https://marketplace.visualstudio.com/items?itemName=snowflake.snowflake-vsc)
 - [GitHub Pull Requests and Issues for VS Code](https://code.visualstudio.com/docs/sourcecontrol/github)
