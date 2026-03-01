@@ -55,6 +55,38 @@ Provider アカウント          Consumer アカウント
 
 ---
 
+### Secure View の詳細
+
+#### なぜ Secure View が必要か
+
+通常の VIEW は Consumer が `GET_DDL()` で内部 SQL を参照できる。
+Secure View は DDL が隠蔽されるため、実装ロジック（フィルタ条件・計算式など）を守れる。
+
+```sql
+-- 通常の VIEW（DDL が見える）
+CREATE OR REPLACE VIEW orders_view AS
+SELECT * FROM orders WHERE region = 'JP';
+
+-- Secure VIEW（DDL が隠蔽される）
+CREATE OR REPLACE SECURE VIEW orders_secure_view AS
+SELECT * FROM orders WHERE region = 'JP';
+```
+
+#### 性能コスト
+
+Secure View は Snowflake の INLINE 最適化（プッシュダウン）が無効になる。
+→ 不要な場所で使わず、「データ共有（Marketplace / Direct Share）」が必要な場合のみ使用する。
+
+#### 使い分けガイド
+
+| 状況 | 推奨 |
+|------|------|
+| データ共有（Marketplace・Direct Share）| Secure View 必須 |
+| 社内の権限制御のみ | 通常 VIEW + Column-Level Security |
+| パフォーマンス重視 | 通常 VIEW |
+
+---
+
 ### 3. Provider / Consumer モデル
 
 ```
