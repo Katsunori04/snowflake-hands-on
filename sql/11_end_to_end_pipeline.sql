@@ -1,6 +1,12 @@
 -- What you learn:
 -- - この教材の全体像を 1 本の流れとして確認する
 -- - どこで raw / staging / mart / AI を使うか整理する
+--
+-- Prerequisite:
+--   03_snowpipe.sql   が完了していること（RAW.RAW_EVENTS_PIPE）
+--   04_streams_tasks.sql が完了していること（MART.FACT_PURCHASE_EVENTS）
+--   06_star_schema.sql   が完了していること（MART.DIM_PRODUCTS）
+--   09_ai_sql.sql        が完了していること（STAGING.REVIEWS）
 
 -- 【全体パイプライン図】
 --
@@ -19,7 +25,7 @@
 --     MART.FACT_PURCHASE_EVENTS
 --           │
 --           ├──→ DIM_USERS / DIM_PRODUCTS / DIM_DATE（06章）
---           └──→ AI_COMPLETE / AI_CLASSIFY（08章）
+--           └──→ AI_COMPLETE / AI_CLASSIFY（09章）
 
 -- 1. raw にあるデータの確認（← 03章 COPY INTO で取り込んだデータ）
 select
@@ -50,7 +56,7 @@ join LEARN_DB.MART.DIM_PRODUCTS d
 group by d.category
 order by sales_amount desc;
 
--- 4. AI で review を要約（← 08章 STAGING.REVIEWS のデータ）
+-- 4. AI で review を要約（← 09章 STAGING.REVIEWS のデータ）
 select
   review_id,
   AI_COMPLETE(
@@ -65,4 +71,4 @@ order by review_id;
 -- - stream は差分を提供（04章）
 -- - task は変換を定期実行（04章）
 -- - mart は分析しやすい形（06章）
--- - AI はテキスト列の後段処理（08章）
+-- - AI はテキスト列の後段処理（09章）
