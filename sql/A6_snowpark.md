@@ -191,6 +191,6 @@ session.sproc.register(
 
 ## 参考リソース
 
-- [Snowpark Python API リファレンス（Snowflake ドキュメント）](https://docs.snowflake.com/en/developer-guide/snowpark/python/index)
-- [Snowsight Notebooks の使い方](https://docs.snowflake.com/en/user-guide/ui-snowsight-notebooks-use)
-- [Snowpark ML ドキュメント](https://docs.snowflake.com/en/developer-guide/snowflake-ml/overview)
+- [Snowpark Python API リファレンス（Snowflake ドキュメント）](https://docs.snowflake.com/ja/developer-guide/snowpark/python/index)
+- [Snowflake Notebooksについて](https://docs.snowflake.com/ja/user-guide/ui-snowsight/notebooks)
+- [Snowpark ML ドキュメント](https://docs.snowflake.com/ja/developer-guide/snowflake-ml/overview)

@@ -301,9 +301,9 @@ order by total_amount desc;
 
 ## 参考リンク
 
-- [VARIANT 型の概要](https://docs.snowflake.com/en/user-guide/semistructured-intro)
-- [半構造化データのクエリ](https://docs.snowflake.com/en/user-guide/querying-semistructured)
-- [FLATTEN 関数](https://docs.snowflake.com/en/sql-reference/functions/flatten)
+- [VARIANT 型の概要](https://docs.snowflake.com/ja/user-guide/semistructured-intro)
+- [半構造化データのクエリ](https://docs.snowflake.com/ja/user-guide/querying-semistructured)
+- [FLATTEN 関数](https://docs.snowflake.com/ja/sql-reference/functions/flatten)
 
 ## 学習チェックリスト
 

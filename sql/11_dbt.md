@@ -262,7 +262,7 @@ dbt docs serve
 
 - [dbt ドキュメント](https://docs.getdbt.com/)
 - [dbt Snowflake アダプタ](https://docs.getdbt.com/docs/core/connect-data-platform/snowflake-setup)
-- [Snowflake + dbt 連携ガイド](https://docs.snowflake.com/en/user-guide/ecosystem-dbt)
+- [Snowflakeでのdbtプロジェクト](https://docs.snowflake.com/ja/user-guide/data-engineering/dbt-projects-on-snowflake)
 
 ## 学習チェックリスト
 

@@ -346,10 +346,10 @@ alter task STAGING.LOAD_FACT_PURCHASE_EVENTS resume;
 
 ## 参考リンク
 
-- [Stream の概要](https://docs.snowflake.com/en/user-guide/streams-intro)
-- [MERGE 文](https://docs.snowflake.com/en/sql-reference/sql/merge)
-- [Task の概要](https://docs.snowflake.com/en/user-guide/tasks-intro)
-- [TASK_HISTORY 関数](https://docs.snowflake.com/en/sql-reference/functions/task_history)
+- [Stream の概要](https://docs.snowflake.com/ja/user-guide/streams-intro)
+- [MERGE 文](https://docs.snowflake.com/ja/sql-reference/sql/merge)
+- [Task の概要](https://docs.snowflake.com/ja/user-guide/tasks-intro)
+- [TASK_HISTORY 関数](https://docs.snowflake.com/ja/sql-reference/functions/task_history)
 
 ## 学習チェックリスト
 

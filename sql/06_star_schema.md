@@ -252,8 +252,8 @@ DIM_PRODUCTS ── FACT_PURCHASE_EVENTS ── DIM_DATE
 
 ## 参考リンク
 
-- [テーブル設計の考え方](https://docs.snowflake.com/en/user-guide/table-considerations)
-- [CREATE TABLE](https://docs.snowflake.com/en/sql-reference/sql/create-table)
+- [テーブル設計の考え方](https://docs.snowflake.com/ja/user-guide/table-considerations)
+- [CREATE TABLE](https://docs.snowflake.com/ja/sql-reference/sql/create-table)
 
 ## 学習チェックリスト
 
