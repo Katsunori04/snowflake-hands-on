@@ -50,6 +50,25 @@ use schema RAW;
 create or replace stream RAW.RAW_EVENTS_STREAM
   on table RAW.RAW_EVENTS_PIPE;
 
+-- ★ 重要: Stream に差分があるか確認する
+-- Stream は「作成時点以降の変更のみ」を追跡する。
+-- 03章で既にデータを取り込んでいる場合、Stream は空（FALSE）になることがある。
+select system$stream_has_data('RAW.RAW_EVENTS_STREAM');
+
+-- ↑ FALSE だった場合は、以下の COPY INTO で差分を発生させてから MERGE に進む。
+-- FORCE = TRUE で「同じファイルでも強制的に再取り込み」する。
+-- ※ RAW_EVENTS_PIPE に重複行が入るが、MERGE の複合キー（event_id + sku）で
+--   FACT テーブルへの重複は防がれる。
+--
+-- copy into RAW.RAW_EVENTS_PIPE(raw, src_filename)
+-- from (select $1, metadata$filename from @RAW.EVENT_STAGE)
+-- file_format = (format_name = RAW.JSON_FF)
+-- on_error = 'CONTINUE'
+-- force = TRUE;
+--
+-- 再確認（TRUE になれば MERGE に進める）
+-- select system$stream_has_data('RAW.RAW_EVENTS_STREAM');
+
 use schema MART;
 
 -- FACT テーブルに product_name / category を持つ理由:

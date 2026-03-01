@@ -177,6 +177,32 @@ create or replace stream RAW.RAW_EVENTS_STREAM
   on table RAW.RAW_EVENTS_PIPE;
 ```
 
+Stream を作成したら、差分があるか確認します。
+
+```sql
+select system$stream_has_data('RAW.RAW_EVENTS_STREAM');
+```
+
+> **⚠️ FALSE が返ってきた場合（よくある落とし穴）**
+>
+> Stream は「**作成された時点以降の変更のみ**」を追跡します。03章で既にデータを取り込んでいた場合、その変更は Stream に含まれないため `FALSE` になります。
+>
+> 以下の SQL で Stage から再ロードして差分を発生させてください。
+> `FORCE = TRUE` は「同じファイルでも強制的に再取り込みする」オプションです。
+>
+> ```sql
+> copy into RAW.RAW_EVENTS_PIPE(raw, src_filename)
+> from (select $1, metadata$filename from @RAW.EVENT_STAGE)
+> file_format = (format_name = RAW.JSON_FF)
+> on_error = 'CONTINUE'
+> force = TRUE;
+>
+> -- 再確認（TRUE になれば次の Step へ）
+> select system$stream_has_data('RAW.RAW_EVENTS_STREAM');
+> ```
+>
+> ※ `FORCE = TRUE` で `RAW_EVENTS_PIPE` に重複行が入りますが、MERGE の複合キー（`event_id + sku`）によって FACT テーブルへの重複は防がれます。
+
 ---
 
 ### Step 2: FACT テーブルを作成する
@@ -339,6 +365,7 @@ alter task STAGING.LOAD_FACT_PURCHASE_EVENTS resume;
 
 | 症状 | 原因 | 対処法 |
 |---|---|---|
+| MERGE を実行しても FACT テーブルが空のまま（0 rows affected） | Stream が空（`SYSTEM$STREAM_HAS_DATA()` が `FALSE`）。Stream は作成後の変更のみを追跡するため、03章で取り込んだデータは含まれない | `COPY INTO ... FORCE = TRUE` で再ロードして Stream に差分を乗せる（Step 1 参照） |
 | Stream のオフセットが進まず、同じ差分が残り続ける | MERGE が未実行、失敗、または Task が `SUSPENDED` のまま | `SHOW TASKS LIKE 'LOAD_FACT_PURCHASE_EVENTS' IN SCHEMA STAGING;` で状態を確認し、必要なら `ALTER TASK STAGING.LOAD_FACT_PURCHASE_EVENTS RESUME;` を実行する |
 | Task は作成したのに自動実行されない | 作成直後の Task はデフォルトで停止状態 | `ALTER TASK ... RESUME` を忘れていないか確認し、再作成後も毎回 `RESUME` する |
 
