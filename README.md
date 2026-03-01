@@ -44,6 +44,14 @@
 | 付録A5 | パフォーマンス詳細（キャッシュ・クラスタリング） | D4（15%） | [教材を読む](sql/A5_performance_clustering.md) | [A5_performance_clustering.sql](sql/A5_performance_clustering.sql) |
 | 付録A6 | Snowpark 入門（Python） | D3（20%） | [教材を読む](sql/A6_snowpark.md) | — |
 
+## 付録：開発ツール連携
+
+本編・SnowPro 対策とは独立した、開発環境・ワークフローの補足資料です。
+
+| 付録 | テーマ | 教材テキスト |
+|---|---|---|
+| 付録A7 | VS Code で Snowflake を開発する | [教材を読む](sql/A7_vscode.md) |
+
 ## 学習ゴール
 
 この教材を終えると、次を説明できる状態を目指します。
@@ -229,6 +237,12 @@ flowchart TD
 4. 付録A4: Secure Data Sharing（Domain 1・6 の残り）
 5. 付録A5: パフォーマンス詳細（Domain 4 の残り）
 6. 付録A6: Snowpark（Domain 3 の補完）
+
+### 開発ツール連携（付録 A7〜）
+
+本編とは独立して、必要なタイミングで読むことを推奨します。
+
+- 付録A7: VS Code 連携 ― SQL ファイルを Git で管理し、diff・PR ベースの開発に慣れたいとき
 
 ## 補足
 
