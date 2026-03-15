@@ -99,7 +99,7 @@ STAGING.REVIEWS（テキストデータ）
         │
         │ SNOWFLAKE.CORTEX.SEARCH_PREVIEW()
         ▼
-  "comfortable shoes" → r001 の結果を返す
+  "快適なシューズ" → r001 の結果を返す
 ```
 
 | 比較項目 | 通常の LIKE 検索 | Cortex Search |
@@ -268,12 +268,12 @@ DESCRIBE CORTEX SEARCH SERVICE STAGING.REVIEW_SEARCH;
 SQL の `SNOWFLAKE.CORTEX.SEARCH_PREVIEW` 関数で検索クエリを発行します。
 
 ```sql
--- 「comfortable shoes」に意味的に近いレビューを検索
+-- 「快適なシューズ」に意味的に近いレビューを検索
 SELECT
   SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
     'STAGING.REVIEW_SEARCH',
     '{
-      "query":   "comfortable shoes",
+      "query":   "快適なシューズ",
       "columns": ["review_id", "user_id", "review_text"],
       "limit":   3
     }'
@@ -290,7 +290,7 @@ SELECT
 FROM (
   SELECT parse_json(SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
     'STAGING.REVIEW_SEARCH',
-    '{"query": "comfortable shoes", "columns": ["review_id","user_id","review_text"], "limit": 3}'
+    '{"query": "快適なシューズ", "columns": ["review_id","user_id","review_text"], "limit": 3}'
   )) AS raw
 ),
 LATERAL FLATTEN(INPUT => raw:results) r;
@@ -302,7 +302,7 @@ LATERAL FLATTEN(INPUT => raw:results) r;
 SELECT SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
   'STAGING.REVIEW_SEARCH',
   '{
-    "query":   "delivery problem",
+    "query":   "配送の問題",
     "columns": ["review_id", "review_text"],
     "filter":  {"@eq": {"user_id": "u002"}},
     "limit":   5
@@ -325,7 +325,7 @@ SHOW CORTEX SEARCH SERVICES IN SCHEMA STAGING;
 -- 検索テスト（コーヒー関連のレビューを探す）
 SELECT SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
   'STAGING.REVIEW_SEARCH',
-  '{"query": "coffee aroma", "columns": ["review_id","review_text"], "limit": 3}'
+  '{"query": "コーヒーの香り", "columns": ["review_id","review_text"], "limit": 3}'
 ) AS results;
 ```
 
@@ -340,7 +340,7 @@ SELECT SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
 
 2. **（ステップ2 発展）Cortex Search の検索クエリを変えてみる**
 
-   `"query": "coffee aroma"` を `"query": "setup instructions confusing"` に変えて、
+   `"query": "コーヒーの香り"` を `"query": "setup instructions confusing"` に変えて、
    ベクトル検索が意味的に近いレビューを見つけることを確認してみましょう。
 
 ---

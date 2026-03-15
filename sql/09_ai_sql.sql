@@ -60,7 +60,7 @@ select
   review_id,
   review_text,
   AI_COMPLETE(
-    'claude-3-5-sonnet',
+    'claude-sonnet-4-6',
     '以下のカスタマーレビューを日本語で1文に要約してください: ' || review_text
   ) as summary_ja
 from STAGING.REVIEWS;
@@ -108,7 +108,7 @@ select
   e.event_time,
   r.review_id,
   AI_COMPLETE(
-    'claude-3-5-sonnet',
+    'claude-sonnet-4-6',
     '以下のレビューから読み取れる顧客の意図を日本語で1行にまとめてください: ' || r.review_text
   ) as customer_intent
 from STAGING.STG_EVENTS e

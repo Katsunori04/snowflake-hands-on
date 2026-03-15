@@ -104,8 +104,8 @@ order by sales_amount desc;
 select
   review_id,
   AI_COMPLETE(
-    'claude-3-5-sonnet',
-    'Summarize this review in plain Japanese: ' || review_text
+    'claude-sonnet-4-6',
+    '以下のレビューを日本語で要約してください: ' || review_text
   ) as summary_ja
 from LEARN_DB.STAGING.REVIEWS
 order by review_id;

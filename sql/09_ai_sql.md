@@ -70,9 +70,9 @@ create or replace table STAGING.REVIEWS (
 );
 
 insert into STAGING.REVIEWS values
-  ('r001', 'u001', 'Fast delivery and good quality. The shoes were comfortable for trail running.'),
-  ('r002', 'u002', 'Coffee aroma was excellent, but the package arrived slightly damaged.'),
-  ('r003', 'u003', 'The product was okay overall, but setup instructions were confusing.');
+  ('r001', 'u001', '配送がとても速く、品質も申し分ありませんでした。シューズはトレイルランニングに最適で快適に使えました。'),
+  ('r002', 'u002', 'コーヒーの香りは素晴らしかったですが、パッケージが少し破損した状態で届きました。'),
+  ('r003', 'u003', '商品自体は概ね問題ありませんでしたが、セットアップの説明書がわかりにくく困りました。');
 ```
 
 ---
@@ -84,8 +84,8 @@ select
   review_id,
   review_text,
   AI_COMPLETE(
-    'claude-3-5-sonnet',                                     -- 使用するモデル
-    'Summarize this customer review in one short sentence in Japanese: ' || review_text
+    'claude-sonnet-4-6',                                     -- 使用するモデル
+    '以下のカスタマーレビューを日本語で1文に要約してください: ' || review_text
   ) as summary_ja
 from STAGING.REVIEWS;
 ```
@@ -108,11 +108,11 @@ select
   AI_CLASSIFY(
     review_text,
     [
-      object_construct('label', 'positive', 'description', 'Overall favorable review'),
-      object_construct('label', 'neutral',  'description', 'Mixed or balanced review'),
-      object_construct('label', 'negative', 'description', 'Mostly dissatisfied review')
+      object_construct('label', 'positive', 'description', '全体的に好意的なレビュー'),
+      object_construct('label', 'neutral',  'description', '賛否混在、またはバランスの取れたレビュー'),
+      object_construct('label', 'negative', 'description', '概ね不満のあるレビュー')
     ],
-    object_construct('task_description', 'Classify customer review sentiment')
+    object_construct('task_description', 'カスタマーレビューの感情を分類してください')
   ) as sentiment_result
 from STAGING.REVIEWS;
 ```
@@ -129,9 +129,9 @@ select
   AI_EXTRACT(
     review_text,
     object_construct(
-      'product_quality', 'What does the review say about quality?',
-      'delivery',        'What does the review say about shipping or delivery?',
-      'issue',           'What problem or complaint is mentioned?'
+      'product_quality', 'レビューは商品の品質についてどのように述べていますか？',
+      'delivery',        'レビューは配送・発送についてどのように述べていますか？',
+      'issue',           'どのような問題や不満が述べられていますか？'
     )
   ) as extracted_points
 from STAGING.REVIEWS;
@@ -152,8 +152,8 @@ select
   e.event_time,
   r.review_id,
   AI_COMPLETE(
-    'claude-3-5-sonnet',
-    'Write one Japanese bullet summarizing the likely customer intent behind this review: ' || r.review_text
+    'claude-sonnet-4-6',
+    '以下のレビューから読み取れる顧客の意図を日本語で1行にまとめてください: ' || r.review_text
   ) as customer_intent
 from STAGING.STG_EVENTS e
 join STAGING.REVIEWS r on e.user_id = r.user_id
@@ -190,11 +190,11 @@ select
   AI_CLASSIFY(
     review_text,
     [
-      object_construct('label', 'product',  'description', 'About product quality or features'),
-      object_construct('label', 'delivery', 'description', 'About shipping, delivery, or packaging'),
-      object_construct('label', 'usability','description', 'About ease of use or instructions')
+      object_construct('label', 'product',  'description', '商品の品質や機能に関するレビュー'),
+      object_construct('label', 'delivery', 'description', '配送・発送・梱包に関するレビュー'),
+      object_construct('label', 'usability','description', '使いやすさや説明書に関するレビュー')
     ],
-    object_construct('task_description', 'Classify customer review by topic')
+    object_construct('task_description', 'カスタマーレビューをトピック別に分類してください')
   ) as topic_result
 from STAGING.REVIEWS;
 ```
