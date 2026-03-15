@@ -45,6 +45,8 @@ FROM MART.FACT_PURCHASE_EVENTS;
 SELECT user_id || ' - ' || product_name AS summary FROM MART.FACT_PURCHASE_EVENTS;
 ```
 
+> **参考**: Snowflake 公式ドキュメント — [SELECT](https://docs.snowflake.com/ja/sql-reference/sql/select)
+
 ---
 
 ## Section 2: WHERE
@@ -63,6 +65,8 @@ SELECT user_id || ' - ' || product_name AS summary FROM MART.FACT_PURCHASE_EVENT
 
 > **注意**: `= NULL` は**常に FALSE**。NULL の判定は必ず `IS NULL` を使う（詳細は Section 9）。
 
+> **参考**: Snowflake 公式ドキュメント — [SELECT](https://docs.snowflake.com/ja/sql-reference/sql/select)（WHERE 仕様を含む）
+
 ---
 
 ## Section 3: ORDER BY / LIMIT / DISTINCT
@@ -73,6 +77,8 @@ SELECT user_id || ' - ' || product_name AS summary FROM MART.FACT_PURCHASE_EVENT
 - `ORDER BY 列1, 列2` — 第1キーが同じ行に対して第2キーで並び替え
 - `LIMIT N` は `ORDER BY` と組み合わせて「上位N件」を取得するパターンが多い
 - `SELECT DISTINCT 列` でユニーク値のみ返す。`COUNT(DISTINCT 列)` でユニーク件数
+
+> **参考**: Snowflake 公式ドキュメント — [SELECT](https://docs.snowflake.com/ja/sql-reference/sql/select)（ORDER BY / LIMIT / DISTINCT 仕様を含む）
 
 ---
 
@@ -109,6 +115,8 @@ GROUP BY category
 HAVING COUNT(*) >= 3               -- ← グループレベルで絞る（HAVING）
 ```
 
+> **参考**: Snowflake 公式ドキュメント — [集計関数](https://docs.snowflake.com/ja/sql-reference/functions-aggregation)
+
 ---
 
 ## Section 5: DDL
@@ -125,6 +133,7 @@ HAVING COUNT(*) >= 3               -- ← グループレベルで絞る（HAVIN
 
 **CREATE OR REPLACE**
 Snowflake では冪等性（何度実行しても同じ結果）のために `CREATE OR REPLACE` を多用します。既存オブジェクトを上書き再作成するため、エラーにならずスクリプトを再実行できます。
+> **注意（Time Travel）**: `CREATE OR REPLACE` でドロップされたテーブルは Time Travel 内で保持され、保持期間中はストレージコストに影響します。頻繁に実行する場合は `DROP TABLE` を明示して不要なデータを消すか、保持期間（`DATA_RETENTION_TIME_IN_DAYS`）を短縮することを検討してください。
 
 **CTAS（CREATE TABLE AS SELECT）**
 ```sql
@@ -154,6 +163,8 @@ CREATE OR REPLACE TABLE new_table AS SELECT ... FROM existing_table;
 | `ALTER TABLE` | 08章（コスト最適化）/ A5（クラスタリング設定） |
 | `CREATE VIEW` | 07章（V_SALES_DETAIL / V_CATEGORY_MONTHLY_SALES） |
 | `TRUNCATE TABLE` | 実験・リセット時に使用 |
+
+> **参考**: Snowflake 公式ドキュメント — [CREATE TABLE](https://docs.snowflake.com/ja/sql-reference/sql/create-table) / [CREATE VIEW](https://docs.snowflake.com/ja/sql-reference/sql/create-view)
 
 ---
 
@@ -226,6 +237,8 @@ INNER JOIN MART.DIM_PRODUCTS d ON f.sku     = d.sku
 GROUP BY u.prefecture, d.category;
 ```
 
+> **参考**: Snowflake 公式ドキュメント — [JOIN](https://docs.snowflake.com/ja/sql-reference/constructs/join)
+
 ---
 
 ## Section 7: サブクエリと CTE
@@ -282,6 +295,8 @@ SELECT * FROM tier_summary;
 |---|---|
 | 04章 MERGE | `MERGE ... USING (SELECT ...)` のインラインビュー |
 | 10章 Semantic View | CTEに近いビジネスロジックの記述構造 |
+
+> **参考**: Snowflake 公式ドキュメント — [WITH（CTE）](https://docs.snowflake.com/ja/sql-reference/constructs/with)
 
 ---
 
@@ -358,6 +373,8 @@ WITH ranked AS (
 SELECT * FROM ranked WHERE rn = 1;
 ```
 
+> **参考**: Snowflake 公式ドキュメント — [分析（ウィンドウ）関数](https://docs.snowflake.com/ja/sql-reference/functions-analytic)
+
 ---
 
 ## Section 9: CASE WHEN と NULL処理
@@ -420,6 +437,8 @@ SELECT COUNT(*) - COUNT(src_filename) AS null_count FROM MART.FACT_PURCHASE_EVEN
 | `NULLIF(a, b)` | ゼロ除算防止（`line_amount / NULLIF(qty, 0)`）でよく使う |
 | `IFF(col IS NULL, '不明', col)` | 条件付きで異なるデフォルト値を返したいとき |
 
+> **注意（COALESCE の型変換）**: 異なるデータ型の引数を混在させると、Snowflake が暗黙的に `NUMBER(18,5)` などに変換する場合があります。型を統一するか、明示的に `CAST` することで予期しない変換を防げます。
+
 ### 本編06章との接続
 
 本編06章の DIM_USERS 作成では CASE WHEN でダミーデータを設定しています。
@@ -432,6 +451,8 @@ FROM MART.FACT_PURCHASE_EVENTS;
 ```
 
 これはマスタテーブルが存在しない場合の学習用の簡略化です。本番では別テーブルから JOIN で取得します。
+
+> **参考**: Snowflake 公式ドキュメント — [CASE](https://docs.snowflake.com/ja/sql-reference/functions/case) / [COALESCE](https://docs.snowflake.com/ja/sql-reference/functions/coalesce)
 
 ---
 
@@ -505,6 +526,8 @@ ORDER BY table_name;
 - **00章** で実際に CREATE したオブジェクト（WH・DB・Schema）が、ここで確認できる構造になっています
 - **SHOW** コマンドの出力 ≒ `INFORMATION_SCHEMA` のビューを GUI で見たもの（Snowsight のオブジェクトエクスプローラーと同じ情報）
 
+> **参考**: Snowflake 公式ドキュメント — [アクセス制御の概要](https://docs.snowflake.com/ja/user-guide/security-access-control-overview)（SHOW / INFORMATION_SCHEMA 関連も含む）
+
 ---
 
 ## Section 11: ユーザー・ロール・権限の基本
@@ -573,6 +596,8 @@ REVOKE SELECT ON ALL TABLES IN SCHEMA HANDS_ON_DB.MART FROM ROLE ANALYST_ROLE;
 
 - **00章**: 本編では `SYSADMIN` で全操作しています。実務では用途ごとにロールを分けるのが標準です
 - **A3章**: Dynamic Masking・Row Access Policy など、行/列レベルの高度なアクセス制御は A3 章を参照してください
+
+> **参考**: Snowflake 公式ドキュメント — [アクセス制御の概要](https://docs.snowflake.com/ja/user-guide/security-access-control-overview)
 
 ---
 
