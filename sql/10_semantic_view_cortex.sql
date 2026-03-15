@@ -155,12 +155,12 @@ DESCRIBE CORTEX SEARCH SERVICE STAGING.REVIEW_SEARCH;
 -- 引数: (サービス名, JSON 文字列)
 -- JSON のキー: query（検索語）, columns（返す列）, limit（件数）, filter（絞り込み）
 
--- Run this first: 「comfortable shoes」に意味的に近いレビューを検索
+-- Run this first: 「快適なシューズ」に意味的に近いレビューを検索
 SELECT
   SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
     'STAGING.REVIEW_SEARCH',
     '{
-      "query":   "comfortable shoes",
+      "query":   "快適なシューズ",
       "columns": ["review_id", "user_id", "review_text"],
       "limit":   3
     }'
@@ -175,7 +175,7 @@ SELECT
 FROM (
   SELECT PARSE_JSON(SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
     'STAGING.REVIEW_SEARCH',
-    '{"query": "comfortable shoes", "columns": ["review_id","user_id","review_text"], "limit": 3}'
+    '{"query": "快適なシューズ", "columns": ["review_id","user_id","review_text"], "limit": 3}'
   )) AS raw
 ),
 LATERAL FLATTEN(INPUT => raw:results) r;
@@ -185,7 +185,7 @@ SELECT
   SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
     'STAGING.REVIEW_SEARCH',
     '{
-      "query":   "delivery problem",
+      "query":   "配送の問題",
       "columns": ["review_id", "review_text"],
       "filter":  {"@eq": {"user_id": "u002"}},
       "limit":   5
@@ -195,5 +195,5 @@ SELECT
 -- Try this:
 -- 1. SEM_PURCHASE_EVENTS に新しいメトリクス（例: MAX(line_amount) AS max_line_amount）を追加し
 --    Cortex Analyst に「最も高額な明細を教えてください」と質問してみる
--- 2. REVIEW_SEARCH の検索クエリを "coffee aroma" に変えて、
+-- 2. REVIEW_SEARCH の検索クエリを "コーヒーの香り" に変えて、
 --    意味的に近いレビュー（r002）がヒットすることを確認してみる
