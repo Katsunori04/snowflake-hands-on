@@ -61,13 +61,31 @@ flowchart TD
 
 ---
 
-### ストアドプロシージャとは
+### ストアドプロシージャとは：なぜ必要か
 
-SQL ロジックをまとめて **名前を付けて再利用** できるオブジェクトです。
+04章では Task の中に MERGE 文を直接書きました。これが**複数箇所に増えると**どうなるか想像してください。
+
+```
+Task A（毎朝）     → MERGE文(30行)をコピペ
+Task B（毎時）     → 同じMERGE文(30行)をコピペ
+手動メンテ用スクリプト → 同じMERGE文(30行)をコピペ
+```
+
+バグを修正するとき、3箇所全部直す必要があります。どこか見落としたらバグが残る。
+
+**ストアドプロシージャはこの問題への回答**です。ロジックに名前をつけて、変更は1箇所だけで済むようにします。
+
+```
+Task A → CALL SP_MERGE()  ← 3箇所とも
+Task B → CALL SP_MERGE()     同じ CALL 文
+手動  → CALL SP_MERGE()
+```
+
+SP の中身を変えれば、呼び出し側（Task）は一切変更不要です。
 
 - `CREATE PROCEDURE` で定義し、`CALL` で実行する
 - 変数・条件分岐・ループが使える（Snowflake Scripting）
-- Task の AS 節に長い MERGE 文を書く代わりに `CALL procedure_name()` と書ける
+- `CALL SP_NAME()` 1行で手動テストできる（本番と全く同じロジックを実行）
 
 ```sql
 -- 定義
@@ -85,9 +103,21 @@ CALL MART.SP_MERGE_PURCHASE_EVENTS();
 
 ---
 
-### Dynamic Table とは
+### Dynamic Table とは：手続き的 vs 宣言的
 
-`SELECT` 文の結果を常に最新の状態に保ち続けるテーブルです。
+04章(Stream + Task)と05章(Dynamic Table)は**同じ結果**を出しますが、考え方が真逆です。
+
+| 04章（手続き的） | 05章（宣言的） |
+|---|---|
+| 「どうやって更新するか」を書く | 「どんなデータであるべきか」を書く |
+| Stream・Task・MERGE・RESUME... | SELECT 文だけ |
+| Snowflake に「命令」する | Snowflake に「委任」する |
+
+料理で例えると：
+- **手続き的** = 「冷蔵庫を開けて → 卵を取り出して → フライパンを熱して → 卵を割って...」
+- **宣言的** = 「目玉焼きが欲しい」（やり方は任せる）
+
+`CREATE DYNAMIC TABLE ... AS SELECT ...` は「このSELECTの結果が常に最新であってほしい、やり方はSnowflakeに任せる」という宣言です。Stream も Task も自分では作らなくてよい。
 
 ```sql
 CREATE OR REPLACE DYNAMIC TABLE STAGING.DYN_STG_EVENTS
@@ -121,7 +151,52 @@ AS
 
 ---
 
+### Task DAG とは：なぜ必要か
+
+「Task A（5分ごとにPIPE REFRESH）」と「Task B（5分ごとにMERGE）」を**別々のスケジュールで作ったらダメなのか？**
+
+```
+Task A: 5分ごとにPIPE REFRESH（データ取り込み）
+Task B: 5分ごとにMERGE（FACTテーブルに反映）
+```
+
+これだと順序が保証できません。
+
+```
+00:00  Task A 開始（取り込みに3分かかる）
+00:00  Task B も同時に開始 ← A がまだ終わっていないのに走り出す
+         ↓
+         古いデータをMERGEしてしまう
+```
+
+`AFTER` 句はこの問題を解決します。B はスケジュールを持たず、A の完了という**イベントで起動**します。
+
+```
+00:00  Task A 開始
+00:03  Task A 完了 → B へバトンを渡す
+00:03  Task B 開始（A の完了を受けて即座に起動）
+00:04  Task B 完了
+```
+
+---
+
 ### Task DAG の「子を先に resume する理由」
+
+リレーで考えると直感的に理解できます。
+
+```
+【誤った順序: 親 → 子】
+00:00  親を先に RESUME → 親がコースに立ち、カウントダウン開始
+00:05  親が実行完了 → 子にバトンを渡そうとする
+       ↓
+       子はまだコースに来ていない（SUSPENDED）→ バトンを落とす
+       次のチャンスは 00:10（次回スケジュール）まで待つことになる
+
+【正しい順序: 子 → 親】
+00:00  子を先に RESUME → 子がコースで待機
+00:00  親をその後 RESUME → 親がコースに立つ
+00:05  親が実行完了 → 子にバトンを渡す → 子が即座に走る ✓
+```
 
 ```mermaid
 sequenceDiagram
@@ -132,7 +207,7 @@ sequenceDiagram
   rect rgb(232, 245, 233)
     Note over U,C: 正しい順序（子 -> 親）
     U->>C: ALTER TASK RAW.TASK_MERGE_FACT RESUME
-    Note over C: 子は started 状態で待機
+    Note over C: 子は started 状態で待機（コースに立つ）
     U->>P: ALTER TASK RAW.TASK_LOAD_PIPE RESUME
     P->>P: 次回スケジュールで実行
     P-->>C: AFTER 依存で子を起動
@@ -143,17 +218,11 @@ sequenceDiagram
     Note over U,C: 誤った順序（親 -> 子）
     U->>P: ALTER TASK RAW.TASK_LOAD_PIPE RESUME
     P->>P: 次回スケジュールで実行
-    P--xC: 子は SUSPENDED のため起動されない
+    P--xC: 子は SUSPENDED のためバトンを落とす
     U->>C: ALTER TASK RAW.TASK_MERGE_FACT RESUME
-    Note over C: その後 started になっても、落とした初回トリガーは戻らない
+    Note over C: 次のスケジュールまで待つことになる
   end
 ```
-
-理由を整理すると次の 3 点です。
-
-1. 親 Task を `RESUME` すると、その時点で次回のスケジュール実行が有効になります。
-2. 親が完了した瞬間に `AFTER` 先の子 Task が `started` でなければ、その実行タイミングでは子が動きません。
-3. そのため、先に子を待機状態にしてから親を開始すると、初回実行から DAG 全体が確実に連鎖します。
 
 ---
 
