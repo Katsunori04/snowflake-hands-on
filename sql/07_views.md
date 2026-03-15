@@ -82,13 +82,53 @@ flowchart LR
 
 ### Secure View はいつ使うか
 
-普通の View は、社内の分析用には十分です。一方、**Secure View** は「見せ方」と「公開範囲」をより厳密に扱いたいときに使います。
+#### 通常の View の問題点
 
-典型例:
+通常の View は、定義（SELECT 文）を誰でも確認できます。
 
-- 共有先に内部列を見せたくない
-- データ共有で SQL の最適化経由の情報漏えいを避けたい
-- セキュリティ境界を明確にしたい
+```sql
+-- 誰でもビューの定義を見られる
+SHOW VIEWS LIKE 'V_SALES_DETAIL';
+-- または
+SELECT GET_DDL('VIEW', 'MART.V_SALES_DETAIL');
+-- → ビューの SELECT 文が丸見え：テーブル構造・JOIN 条件・フィルタ条件がバレる
+```
+
+社内の分析用途では問題になりませんが、**外部共有・他部門公開・行レベルセキュリティ**を実装する場面では、この「定義の透過性」がリスクになります。
+
+#### SECURE VIEW が解決すること
+
+`CREATE SECURE VIEW` にするだけで、オーナー以外はビューの定義を参照できなくなります。
+
+| 項目 | 通常 VIEW | SECURE VIEW |
+|---|---|---|
+| ビュー定義の閲覧（GET_DDL） | 誰でも見える | オーナーのみ |
+| Query Profile の詳細 | 表示される | 一部非表示 |
+| Data Sharing での安全性 | 定義が漏れる | 安全に共有可能 |
+
+#### 典型的なユースケース
+
+**① Data Sharing（外部アカウントへの共有）**
+外部アカウントにビューを共有する際、ビュー定義（元のテーブル名・フィルタ条件）を相手に見せたくない場合。
+
+**② 行レベルセキュリティ**
+「自分のデータだけ見せる」ようなフィルタ条件を隠したい場合。
+
+```sql
+-- この WHERE 条件を相手に知られたくない
+CREATE SECURE VIEW MART.V_MY_ORDERS AS
+SELECT * FROM MART.FACT_PURCHASE_EVENTS
+WHERE user_id = CURRENT_USER();
+```
+
+**③ 機密テーブル名の隠蔽**
+元テーブル名や内部スキーマ構造を知られたくない場合。
+
+#### 注意点
+
+- クエリ最適化が制限されるため、**通常 View に比べてわずかにパフォーマンスが低下する**可能性があります
+- オーナー自身は `GET_DDL` で引き続き定義を確認できます
+- 列を絞るだけなら通常 View で十分です。SECURE VIEW は「定義そのものを隠す必要がある」場合に使います
 
 この教材ではまず「分析の入口としての View」を体験し、そのあとに Secure View を軽く触れます。
 
@@ -181,7 +221,7 @@ order by year_num, month_num, sales_amount desc;
 
 ### Step 4: Secure View を作る
 
-たとえば外部共有や他部門公開を意識して、明細の内部 ID を見せたくないとします。
+外部共有や他部門公開を意識して、内部 ID や元テーブルの構造を見せたくない場合に使います。
 
 ```sql
 create or replace secure view MART.V_SALES_PUBLIC as
@@ -194,7 +234,17 @@ select
 from MART.V_SALES_DETAIL;
 ```
 
-ここでは単純に列を絞っただけですが、`SECURE VIEW` にしておくことで「共有用の公開面」という意図が明確になります。
+**通常 View との違いを確認する**:
+
+```sql
+-- 通常 View → 誰でも定義を見られる
+SELECT GET_DDL('VIEW', 'MART.V_SALES_DETAIL');   -- SELECT 文が表示される
+
+-- Secure View → オーナー以外は定義を見られない
+SELECT GET_DDL('VIEW', 'MART.V_SALES_PUBLIC');   -- オーナー以外はエラーまたは空
+```
+
+ここでは列を絞るだけですが、`SECURE VIEW` にすることで「どのテーブルから・どんな条件で取得しているか」をオーナー以外に見せない公開面を作れます。
 
 ---
 
@@ -276,7 +326,7 @@ group by user_id, user_name, prefecture;
 | 概念 | ポイント |
 |---|---|
 | `VIEW` | 分析用の入口。長い JOIN を利用者から隠せる |
-| `SECURE VIEW` | 共有や秘匿を意識した公開面に向く |
+| `SECURE VIEW` | ビューの定義（SQL）をオーナー以外に見せたくない場合に使う。Data Sharing・行レベルセキュリティ・機密テーブル名の隠蔽が典型的な用途 |
 | `VIEW` の価値 | SQL を短くするだけでなく、列名・粒度・定義を統一できる |
 | `DYNAMIC TABLE` との違い | `DYNAMIC TABLE` は変換パイプライン、`VIEW` は利用者向けの見せ方 |
 | `SEMANTIC VIEW` との違い | `SEMANTIC VIEW` は意味を定義するレイヤー |

@@ -644,3 +644,601 @@ Section 11 ユーザー・ロール・権限
 | 09章 AI 関数 | SELECT / GROUP BY の応用 |
 | 10章 Semantic View | CTE に近い構造（Section 7） |
 | A3章 RBAC | 権限の基本（Section 11）の発展形: Dynamic Masking / Row Access Policy |
+
+---
+
+## 練習問題: SQL 20本ノック
+
+> **この付録の使い方**
+> Section 1〜9 の構文を体で覚えるための演習問題です。
+> 前提: **06_star_schema.sql が完了済み**（`MART.FACT_PURCHASE_EVENTS` / `DIM_USERS` / `DIM_PRODUCTS` が存在する状態）。
+> 解答は `<details>` をクリックして確認してください。Section 5（DDL）/ Section 10-11（オブジェクト階層・RBAC）はクエリ演習向きでないため対象外です。
+
+---
+
+### Q1〜Q4: Section 1-2（SELECT / WHERE）
+
+---
+
+### Q1. 税込み計算列を追加せよ
+
+**難易度**: ★☆☆
+
+**問題**: `MART.FACT_PURCHASE_EVENTS` から `event_id`・`product_name`・`line_amount`・税込み金額（`line_amount * 1.1`）を取得せよ。税込み金額の列名は `tax_included` とすること。
+
+**ヒント**: `SELECT`, `AS`, 算術演算（`*`）
+
+<details>
+<summary>解答を見る</summary>
+
+```sql
+SELECT
+    event_id,
+    product_name,
+    line_amount,
+    line_amount * 1.1 AS tax_included
+FROM MART.FACT_PURCHASE_EVENTS;
+```
+
+</details>
+
+---
+
+### Q2. Electronics カテゴリを金額降順で取得せよ
+
+**難易度**: ★☆☆
+
+**問題**: `MART.FACT_PURCHASE_EVENTS` から `category = 'Electronics'` の行を `line_amount` の降順で取得せよ。取得列は `event_id`・`product_name`・`line_amount`。
+
+**ヒント**: `WHERE`, `ORDER BY ... DESC`
+
+<details>
+<summary>解答を見る</summary>
+
+```sql
+SELECT
+    event_id,
+    product_name,
+    line_amount
+FROM MART.FACT_PURCHASE_EVENTS
+WHERE category = 'Electronics'
+ORDER BY line_amount DESC;
+```
+
+</details>
+
+---
+
+### Q3. BETWEEN で中価格帯を絞れ
+
+**難易度**: ★☆☆
+
+**問題**: `MART.FACT_PURCHASE_EVENTS` から `line_amount` が 3000 以上 10000 以下の行を取得せよ。取得列は `event_id`・`category`・`product_name`・`line_amount`。
+
+**ヒント**: `WHERE ... BETWEEN ... AND ...`
+
+<details>
+<summary>解答を見る</summary>
+
+```sql
+SELECT
+    event_id,
+    category,
+    product_name,
+    line_amount
+FROM MART.FACT_PURCHASE_EVENTS
+WHERE line_amount BETWEEN 3000 AND 10000;
+```
+
+</details>
+
+---
+
+### Q4. LIKE で「Phone」を含む商品を探せ
+
+**難易度**: ★☆☆
+
+**問題**: `MART.FACT_PURCHASE_EVENTS` から `product_name` に「Phone」を含む行が何件あるかを取得せよ。結果列名は `phone_count`。
+
+**ヒント**: `WHERE ... LIKE '%...%'`, `COUNT(*)`
+
+<details>
+<summary>解答を見る</summary>
+
+```sql
+SELECT COUNT(*) AS phone_count
+FROM MART.FACT_PURCHASE_EVENTS
+WHERE product_name LIKE '%Phone%';
+```
+
+</details>
+
+---
+
+### Q5〜Q6: Section 3（ORDER BY / LIMIT / DISTINCT）
+
+---
+
+### Q5. 購入金額トップ5を取得せよ
+
+**難易度**: ★☆☆
+
+**問題**: `MART.FACT_PURCHASE_EVENTS` から `line_amount` が大きい順に上位5件を取得せよ。取得列は `event_id`・`user_id`・`product_name`・`line_amount`。
+
+**ヒント**: `ORDER BY ... DESC`, `LIMIT`
+
+<details>
+<summary>解答を見る</summary>
+
+```sql
+SELECT
+    event_id,
+    user_id,
+    product_name,
+    line_amount
+FROM MART.FACT_PURCHASE_EVENTS
+ORDER BY line_amount DESC
+LIMIT 5;
+```
+
+</details>
+
+---
+
+### Q6. 購入カテゴリのユニーク一覧を取得せよ
+
+**難易度**: ★☆☆
+
+**問題**: `MART.FACT_PURCHASE_EVENTS` に存在するカテゴリの一覧を重複なしで取得し、アルファベット昇順で並べよ。
+
+**ヒント**: `SELECT DISTINCT`, `ORDER BY`
+
+<details>
+<summary>解答を見る</summary>
+
+```sql
+SELECT DISTINCT category
+FROM MART.FACT_PURCHASE_EVENTS
+ORDER BY category;
+```
+
+</details>
+
+---
+
+### Q7〜Q9: Section 4（GROUP BY / HAVING）
+
+---
+
+### Q7. カテゴリ別・購入件数と合計金額
+
+**難易度**: ★☆☆
+
+**問題**: `MART.FACT_PURCHASE_EVENTS` をカテゴリ別に集計し、購入件数（`purchase_count`）と合計金額（`total_amount`）を取得せよ。合計金額の降順で並べること。
+
+**ヒント**: `GROUP BY`, `COUNT(*)`, `SUM()`
+
+<details>
+<summary>解答を見る</summary>
+
+```sql
+SELECT
+    category,
+    COUNT(*)        AS purchase_count,
+    SUM(line_amount) AS total_amount
+FROM MART.FACT_PURCHASE_EVENTS
+GROUP BY category
+ORDER BY total_amount DESC;
+```
+
+</details>
+
+---
+
+### Q8. 3回以上購入したユーザーを絞れ
+
+**難易度**: ★★☆
+
+**問題**: `MART.FACT_PURCHASE_EVENTS` からユーザーごとの購入回数を集計し、3回以上購入しているユーザーのみを取得せよ。取得列は `user_id`・`purchase_count`。
+
+**ヒント**: `GROUP BY`, `HAVING COUNT(*) >= 3`
+
+<details>
+<summary>解答を見る</summary>
+
+```sql
+SELECT
+    user_id,
+    COUNT(*) AS purchase_count
+FROM MART.FACT_PURCHASE_EVENTS
+GROUP BY user_id
+HAVING COUNT(*) >= 3
+ORDER BY purchase_count DESC;
+```
+
+</details>
+
+---
+
+### Q9. 平均購入額5000円超のカテゴリのみ
+
+**難易度**: ★★☆
+
+**問題**: `MART.FACT_PURCHASE_EVENTS` をカテゴリ別に集計し、平均購入金額が5000円を超えるカテゴリのみを取得せよ。取得列は `category`・`avg_amount`（小数第2位まで）・`purchase_count`。
+
+**ヒント**: `HAVING AVG() > 5000`, `ROUND()`
+
+<details>
+<summary>解答を見る</summary>
+
+```sql
+SELECT
+    category,
+    ROUND(AVG(line_amount), 2) AS avg_amount,
+    COUNT(*)                   AS purchase_count
+FROM MART.FACT_PURCHASE_EVENTS
+GROUP BY category
+HAVING AVG(line_amount) > 5000
+ORDER BY avg_amount DESC;
+```
+
+</details>
+
+---
+
+### Q10〜Q12: Section 6（JOIN）
+
+---
+
+### Q10. 都道府県別の合計購入金額
+
+**難易度**: ★★☆
+
+**問題**: `MART.FACT_PURCHASE_EVENTS` と `MART.DIM_USERS` を `user_id` で INNER JOIN し、都道府県（`prefecture`）別の合計購入金額を取得せよ。取得列は `prefecture`・`total_amount`。合計金額の降順で並べること。
+
+**ヒント**: `INNER JOIN ... ON`, `GROUP BY`, `SUM()`
+
+<details>
+<summary>解答を見る</summary>
+
+```sql
+SELECT
+    u.prefecture,
+    SUM(f.line_amount) AS total_amount
+FROM MART.FACT_PURCHASE_EVENTS f
+INNER JOIN MART.DIM_USERS u ON f.user_id = u.user_id
+GROUP BY u.prefecture
+ORDER BY total_amount DESC;
+```
+
+</details>
+
+---
+
+### Q11. カテゴリ×商品名の販売集計
+
+**難易度**: ★★☆
+
+**問題**: `MART.FACT_PURCHASE_EVENTS` と `MART.DIM_PRODUCTS` を `sku` で INNER JOIN し、カテゴリ（`d.category`）と商品名（`d.product_name`）ごとに販売件数（`sales_count`）と合計金額（`total_amount`）を集計せよ。カテゴリ昇順・合計金額降順で並べること。
+
+**ヒント**: `INNER JOIN`（複数テーブル）, `GROUP BY 複数列`
+
+<details>
+<summary>解答を見る</summary>
+
+```sql
+SELECT
+    d.category,
+    d.product_name,
+    COUNT(*)            AS sales_count,
+    SUM(f.line_amount)  AS total_amount
+FROM MART.FACT_PURCHASE_EVENTS f
+INNER JOIN MART.DIM_PRODUCTS d ON f.sku = d.sku
+GROUP BY d.category, d.product_name
+ORDER BY d.category, total_amount DESC;
+```
+
+</details>
+
+---
+
+### Q12. 購入履歴のないユーザーを探せ
+
+**難易度**: ★★★
+
+**問題**: `MART.DIM_USERS` の全ユーザーのうち、`MART.FACT_PURCHASE_EVENTS` に1件も購入記録がないユーザーの `user_id` と `user_name` を取得せよ。
+
+**ヒント**: `LEFT JOIN`, `WHERE ... IS NULL`（FACT 側のキーが NULL = 購入なし）
+
+<details>
+<summary>解答を見る</summary>
+
+```sql
+SELECT
+    u.user_id,
+    u.user_name
+FROM MART.DIM_USERS u
+LEFT JOIN MART.FACT_PURCHASE_EVENTS f ON u.user_id = f.user_id
+WHERE f.user_id IS NULL;
+```
+
+</details>
+
+---
+
+### Q13〜Q15: Section 7（サブクエリ / CTE）
+
+---
+
+### Q13. 合計金額が最大のカテゴリを CTE で求めよ
+
+**難易度**: ★★☆
+
+**問題**: CTE を使って、カテゴリ別合計金額を計算し、その中で合計金額が最大のカテゴリ名と金額を取得せよ。
+
+**ヒント**: `WITH ... AS (...)`, `WHERE total = (SELECT MAX(total) FROM ...)`
+
+<details>
+<summary>解答を見る</summary>
+
+```sql
+WITH cat_total AS (
+    SELECT
+        category,
+        SUM(line_amount) AS total
+    FROM MART.FACT_PURCHASE_EVENTS
+    GROUP BY category
+)
+SELECT category, total
+FROM cat_total
+WHERE total = (SELECT MAX(total) FROM cat_total);
+```
+
+</details>
+
+---
+
+### Q14. 全体平均を超える購入レコードを取得せよ
+
+**難易度**: ★★☆
+
+**問題**: `MART.FACT_PURCHASE_EVENTS` から、`line_amount` が全体平均を超えるレコードを取得せよ。取得列は `event_id`・`product_name`・`line_amount`・全体平均（`overall_avg`、小数第2位まで）。
+
+**ヒント**: スカラーサブクエリ `(SELECT AVG(...) FROM ...)` を SELECT 句と WHERE 句の両方で使う
+
+<details>
+<summary>解答を見る</summary>
+
+```sql
+SELECT
+    event_id,
+    product_name,
+    line_amount,
+    ROUND((SELECT AVG(line_amount) FROM MART.FACT_PURCHASE_EVENTS), 2) AS overall_avg
+FROM MART.FACT_PURCHASE_EVENTS
+WHERE line_amount > (SELECT AVG(line_amount) FROM MART.FACT_PURCHASE_EVENTS)
+ORDER BY line_amount DESC;
+```
+
+</details>
+
+---
+
+### Q15. 多段 CTE で上位3ユーザーを抽出せよ
+
+**難易度**: ★★★
+
+**問題**: 多段 CTE を使って、以下の処理を順番に実行し、合計購入金額が上位3位以内のユーザーの `user_id`・`user_name`・`total_amount`・`rank` を取得せよ。
+1. ユーザー別合計金額を集計
+2. DIM_USERS と JOIN してユーザー名を付与
+3. 合計金額の降順でランクを付けて上位3位を抽出
+
+**ヒント**: 多段 CTE（`WITH a AS (...), b AS (...)`）, `RANK() OVER`
+
+<details>
+<summary>解答を見る</summary>
+
+```sql
+WITH user_total AS (
+    -- Step1: ユーザー別合計金額
+    SELECT
+        user_id,
+        SUM(line_amount) AS total_amount
+    FROM MART.FACT_PURCHASE_EVENTS
+    GROUP BY user_id
+),
+user_named AS (
+    -- Step2: ユーザー名を付与
+    SELECT
+        t.user_id,
+        u.user_name,
+        t.total_amount
+    FROM user_total t
+    INNER JOIN MART.DIM_USERS u ON t.user_id = u.user_id
+),
+user_ranked AS (
+    -- Step3: ランク付け
+    SELECT
+        user_id,
+        user_name,
+        total_amount,
+        RANK() OVER (ORDER BY total_amount DESC) AS rank
+    FROM user_named
+)
+SELECT user_id, user_name, total_amount, rank
+FROM user_ranked
+WHERE rank <= 3;
+```
+
+</details>
+
+---
+
+### Q16〜Q18: Section 8（ウィンドウ関数）
+
+---
+
+### Q16. カテゴリ内ランキング1位のレコードを取得せよ
+
+**難易度**: ★★★
+
+**問題**: `MART.FACT_PURCHASE_EVENTS` で、カテゴリ内で `line_amount` が最大のレコードを各カテゴリから1件ずつ取得せよ。取得列は `category`・`product_name`・`line_amount`・`rank`。
+
+**ヒント**: `RANK() OVER (PARTITION BY category ORDER BY line_amount DESC)`, CTE でラップして `WHERE rank = 1`
+
+<details>
+<summary>解答を見る</summary>
+
+```sql
+WITH ranked AS (
+    SELECT
+        category,
+        product_name,
+        line_amount,
+        RANK() OVER (PARTITION BY category ORDER BY line_amount DESC) AS rank
+    FROM MART.FACT_PURCHASE_EVENTS
+)
+SELECT category, product_name, line_amount, rank
+FROM ranked
+WHERE rank = 1
+ORDER BY category;
+```
+
+</details>
+
+---
+
+### Q17. 購入金額の累計を計算せよ
+
+**難易度**: ★★☆
+
+**問題**: `MART.FACT_PURCHASE_EVENTS` を `event_time` 昇順で並べ、各行に購入金額の累計（`running_total`）を付けて取得せよ。取得列は `event_id`・`event_time`・`line_amount`・`running_total`。
+
+**ヒント**: `SUM() OVER (ORDER BY event_time ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)`
+
+<details>
+<summary>解答を見る</summary>
+
+```sql
+SELECT
+    event_id,
+    event_time,
+    line_amount,
+    SUM(line_amount) OVER (
+        ORDER BY event_time
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS running_total
+FROM MART.FACT_PURCHASE_EVENTS
+ORDER BY event_time;
+```
+
+</details>
+
+---
+
+### Q18. 直前購入金額を LAG で取得せよ
+
+**難易度**: ★★★
+
+**問題**: `MART.FACT_PURCHASE_EVENTS` をユーザーごと・`event_time` 昇順で並べ、各行に「同一ユーザーの直前購入金額」（`prev_amount`）と「今回との差額」（`diff`）を付けて取得せよ。直前購入がない場合は 0 として扱うこと。取得列は `user_id`・`event_time`・`line_amount`・`prev_amount`・`diff`。
+
+**ヒント**: `LAG(line_amount, 1, 0) OVER (PARTITION BY user_id ORDER BY event_time)`
+
+<details>
+<summary>解答を見る</summary>
+
+```sql
+SELECT
+    user_id,
+    event_time,
+    line_amount,
+    LAG(line_amount, 1, 0) OVER (
+        PARTITION BY user_id
+        ORDER BY event_time
+    ) AS prev_amount,
+    line_amount - LAG(line_amount, 1, 0) OVER (
+        PARTITION BY user_id
+        ORDER BY event_time
+    ) AS diff
+FROM MART.FACT_PURCHASE_EVENTS
+ORDER BY user_id, event_time;
+```
+
+</details>
+
+---
+
+### Q19〜Q20: Section 9（CASE WHEN / NULL処理）
+
+---
+
+### Q19. 購入金額を3段階に分類して集計せよ
+
+**難易度**: ★★☆
+
+**問題**: `MART.FACT_PURCHASE_EVENTS` の `line_amount` を以下の3段階に分類し、各ランクの件数と合計金額を集計せよ。
+
+| 条件 | ランク |
+|---|---|
+| 10000 以上 | `高額` |
+| 5000 以上 10000 未満 | `中額` |
+| 5000 未満 | `少額` |
+
+取得列は `price_rank`・`purchase_count`・`total_amount`。ランクの順（高額→中額→少額）で並べること。
+
+**ヒント**: `CASE WHEN ... THEN ... WHEN ... THEN ... ELSE ... END`, `GROUP BY`
+
+<details>
+<summary>解答を見る</summary>
+
+```sql
+SELECT
+    CASE
+        WHEN line_amount >= 10000 THEN '高額'
+        WHEN line_amount >= 5000  THEN '中額'
+        ELSE '少額'
+    END                  AS price_rank,
+    COUNT(*)             AS purchase_count,
+    SUM(line_amount)     AS total_amount
+FROM MART.FACT_PURCHASE_EVENTS
+GROUP BY price_rank
+ORDER BY
+    CASE price_rank
+        WHEN '高額' THEN 1
+        WHEN '中額' THEN 2
+        ELSE 3
+    END;
+```
+
+</details>
+
+---
+
+### Q20. NULL を '不明' に変換し NULL 件数も集計せよ
+
+**難易度**: ★★☆
+
+**問題**: `MART.FACT_PURCHASE_EVENTS` から以下の2つを取得せよ。
+1. `src_filename` の NULL を `'不明'` に変換した列（`src_filename_display`）と `line_amount` を全件取得
+2. 別クエリで `src_filename` が NULL の行数（`null_count`）と非 NULL の行数（`not_null_count`）を取得
+
+**ヒント**: `COALESCE(列, '不明')`, `COUNT(*) - COUNT(列)` で NULL 件数を計算
+
+<details>
+<summary>解答を見る</summary>
+
+```sql
+-- 1. NULL を '不明' に変換して全件取得
+SELECT
+    COALESCE(src_filename, '不明') AS src_filename_display,
+    line_amount
+FROM MART.FACT_PURCHASE_EVENTS;
+
+-- 2. NULL 件数 / 非 NULL 件数を集計
+SELECT
+    COUNT(*) - COUNT(src_filename) AS null_count,
+    COUNT(src_filename)            AS not_null_count
+FROM MART.FACT_PURCHASE_EVENTS;
+```
+
+</details>
