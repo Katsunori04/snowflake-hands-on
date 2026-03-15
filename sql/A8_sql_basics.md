@@ -159,6 +159,39 @@ CREATE OR REPLACE TABLE new_table AS SELECT ... FROM existing_table;
 
 ## Section 6: JOIN
 
+### テーブルエイリアスとは
+
+`FROM テーブル名 別名` の形式でテーブルに短い別名を付けられます。`AS` は省略可能です。
+
+```sql
+FROM MART.FACT_PURCHASE_EVENTS f      -- f がエイリアス（AS f でも同義）
+INNER JOIN MART.DIM_USERS u           -- u がエイリアス
+  ON f.user_id = u.user_id
+```
+
+#### エイリアスが必要なケース
+
+| 状況 | 必要性 | 理由 |
+|---|---|---|
+| **同名カラムが複数テーブルに存在** | **必須** | `user_id` が FACT と DIM 両方にある場合、`ON user_id = user_id` と書くと曖昧エラーになる |
+| **同一テーブルを複数回 JOIN（自己結合）** | **必須** | テーブルを区別するための唯一の手段 |
+| **単一テーブルのみ参照** | 不要 | エラーにならないが、書いた方が統一感がある |
+
+#### `f.line_amount` の `f.` は省略できる？
+
+`line_amount` は `FACT_PURCHASE_EVENTS` にしか存在しない列なので、技術的には省略可能です。
+ただし **JOIN が多いクエリでは「どのテーブルの列か」を明示する方が可読性が上がります**。
+
+```sql
+-- 省略可能だが…
+SELECT line_amount FROM MART.FACT_PURCHASE_EVENTS f INNER JOIN MART.DIM_USERS u ON ...
+
+-- テーブルを明示した方が読みやすい
+SELECT f.line_amount FROM MART.FACT_PURCHASE_EVENTS f INNER JOIN MART.DIM_USERS u ON ...
+```
+
+本編の SQL でも JOIN クエリでは必ずプレフィックスを付けるスタイルを統一しています。
+
 ### 4種類の JOIN
 
 ```
