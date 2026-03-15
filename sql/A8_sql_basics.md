@@ -166,6 +166,36 @@ CREATE OR REPLACE TABLE new_table AS SELECT ... FROM existing_table;
 
 > **参考**: Snowflake 公式ドキュメント — [CREATE TABLE](https://docs.snowflake.com/ja/sql-reference/sql/create-table) / [CREATE VIEW](https://docs.snowflake.com/ja/sql-reference/sql/create-view)
 
+### テーブル種別: PERMANENT / TRANSIENT / TEMPORARY
+
+Snowflake のテーブルには**3種類**があり、Time Travel・Fail-safe の有無とコストが異なります。
+
+| 種別 | 宣言方法 | Time Travel | Fail-safe | セッション終了で消える | 主な用途 |
+|---|---|---|---|---|---|
+| **PERMANENT** | `CREATE TABLE` | あり（最大90日） | あり（7日） | 消えない | 本番データ・DIM・FACT |
+| **TRANSIENT** | `CREATE TRANSIENT TABLE` | あり（最大1日） | **なし** | 消えない | ETL中間テーブル・ステージング |
+| **TEMPORARY** | `CREATE TEMPORARY TABLE` | あり（セッション内） | **なし** | **消える** | セッション内の一時集計・デバッグ |
+
+#### TEMPORARY TABLE の特徴
+
+- **スコープがセッション単位**: セッション終了で自動削除（明示的 `DROP TABLE` 不要）
+- **他セッションから見えない**: 同名 PERMANENT が存在しても TEMPORARY が優先（シャドーイング）
+- **Fail-safe なし**: コスト削減になるが、永続データには不向き
+- **典型的な用途**: 複雑な集計の中間保持、デバッグ、ストアドプロシージャ内ワーキングテーブル
+
+#### TRANSIENT との使い分け
+
+| 判断軸 | TRANSIENT | TEMPORARY |
+|---|---|---|
+| 複数セッションから参照したい | ✓ | ✗ |
+| セッション終了後も残したい | ✓ | ✗ |
+| Fail-safe 不要でコスト削減したい | ✓ | ✓ |
+| 自動クリーンアップしたい | ✗ | ✓ |
+
+> TRANSIENT・TEMPORARY はいずれも **Fail-safe がありません**。詳しくは **[A2章: Time Travel と Cloning](./A2_time_travel_cloning.md)** を参照。
+
+> **参考**: [CREATE TABLE（テーブル種別）](https://docs.snowflake.com/ja/sql-reference/sql/create-table#optional-parameters) / [一時テーブルと変換テーブル](https://docs.snowflake.com/ja/user-guide/tables-temp-transient)
+
 ---
 
 ## Section 6: JOIN

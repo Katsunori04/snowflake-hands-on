@@ -322,6 +322,55 @@ SHOW VIEWS  IN SCHEMA HANDS_ON_DB.MART;
 -- Try this: FACT_PURCHASE_EVENTS のカテゴリ別サマリーを CTAS で新テーブルに保存してみる
 
 -- ============================================================
+-- Section 5 補足: テーブル種別（PERMANENT / TRANSIENT / TEMPORARY）
+-- ============================================================
+-- What you learn: 3種類のテーブル種別の違いと TEMPORARY TABLE の実践的な使い方
+--
+--   CREATE TABLE            → PERMANENT  (Time Travel○ / Fail-safe○)
+--   CREATE TRANSIENT TABLE  → TRANSIENT  (Time Travel○ / Fail-safe✗ / 永続)
+--   CREATE TEMPORARY TABLE  → TEMPORARY  (Time Travel○ / Fail-safe✗ / セッション終了で自動削除)
+
+-- DDL⑦: CREATE TEMPORARY TABLE
+-- カテゴリ × ユーザー別の購入サマリを一時集計（セッション終了で自動削除）
+CREATE OR REPLACE TEMPORARY TABLE tmp_user_category_summary AS
+SELECT
+    user_id,
+    category,
+    COUNT(*)         AS purchase_count,
+    SUM(line_amount) AS total_amount,
+    AVG(line_amount) AS avg_amount
+FROM MART.FACT_PURCHASE_EVENTS
+GROUP BY user_id, category;
+
+-- Check: 一時テーブルの内容確認
+SELECT * FROM tmp_user_category_summary ORDER BY total_amount DESC LIMIT 20;
+
+-- Check: SHOW TABLES で KIND 列が "TEMPORARY" と表示されることを確認
+SHOW TABLES LIKE 'TMP_%' IN SCHEMA HANDS_ON_DB.MART;
+
+-- TEMPORARY TABLE を中間ステップとして参照する例（DIM_USERS と JOIN）
+SELECT
+    s.user_id,
+    u.user_name,
+    u.prefecture,
+    s.category,
+    s.purchase_count,
+    s.total_amount,
+    ROUND(
+        s.total_amount / SUM(s.total_amount) OVER (PARTITION BY s.user_id) * 100,
+        1
+    ) AS pct_of_user_total
+FROM tmp_user_category_summary s
+INNER JOIN MART.DIM_USERS u ON s.user_id = u.user_id
+ORDER BY s.user_id, s.total_amount DESC;
+
+-- Try this: TRANSIENT テーブルで同じサマリを作り KIND 列を比較してみる
+-- CREATE OR REPLACE TRANSIENT TABLE HANDS_ON_DB.MART.trs_user_category_summary AS
+--   SELECT user_id, category, COUNT(*) AS purchase_count, SUM(line_amount) AS total_amount
+--   FROM MART.FACT_PURCHASE_EVENTS GROUP BY user_id, category;
+-- SHOW TABLES LIKE '%user_category_summary%' IN SCHEMA HANDS_ON_DB.MART;
+
+-- ============================================================
 -- Section 6: JOIN（INNER / LEFT / RIGHT / FULL OUTER）
 -- ============================================================
 -- What you learn: 複数テーブルの結合・4種類のJOINの違い
