@@ -100,6 +100,32 @@ from STAGING.REVIEWS;
 
 ---
 
+### 補足: OBJECT_CONSTRUCT とは
+
+`OBJECT_CONSTRUCT` は **キーと値のペアから JSON オブジェクト（VARIANT 型）を構築する関数**です。
+
+```sql
+-- 基本構文: キーと値を交互に並べる
+OBJECT_CONSTRUCT('key1', value1, 'key2', value2, ...)
+
+-- 例
+OBJECT_CONSTRUCT('label', 'positive', 'description', '好意的なレビュー')
+-- → {"label": "positive", "description": "好意的なレビュー"}
+```
+
+`AI_CLASSIFY` や `AI_EXTRACT` はラベル定義・抽出スキーマを **JSON オブジェクト** として受け取る設計になっており、
+それを動的に組み立てるために `OBJECT_CONSTRUCT` を使います。
+
+| 使用箇所 | 渡している内容 |
+|---|---|
+| `AI_CLASSIFY` の第2引数（配列の各要素） | `label`（ラベル名）と `description`（分類の説明） |
+| `AI_CLASSIFY` の第3引数 | `task_description`（タスク全体の指示） |
+| `AI_EXTRACT` の第2引数 | 抽出キー名と、それに対応する質問文 |
+
+> **参考**: [OBJECT_CONSTRUCT](https://docs.snowflake.com/ja/sql-reference/functions/object_construct) / [AI_CLASSIFY](https://docs.snowflake.com/ja/sql-reference/functions/ai_classify)
+
+---
+
 ### Step 3: AI_CLASSIFY で感情分類する
 
 ```sql
